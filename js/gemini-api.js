@@ -4,7 +4,7 @@
  */
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
-const GEMINI_MODEL = 'gemini-2.0-flash-preview-image-generation';
+const GEMINI_MODEL = 'gemini-2.0-flash-exp-image-generation';
 
 // Content rating style prompts
 const STYLE_PROMPTS = {
