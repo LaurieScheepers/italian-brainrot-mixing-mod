@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Italian Brainrot Mixing Mod</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- PARENTS ZONE - Content Settings (shows first) -->
+    <div id="parents-zone-screen" class="screen active">
+        <div class="parents-zone-container">
+            <div class="parents-zone-header">
+                <span class="parents-icon">&#128106;</span>
+                <h1>PARENTS ZONE</h1>
+                <p class="parents-subtitle">Content Settings</p>
+            </div>
+
+            <div class="parents-zone-info">
+                <p>Italian Brainrot features surreal, AI-generated hybrid creatures in a fun, meme-style aesthetic.</p>
+                <p>Choose your preferred content level:</p>
+            </div>
+
+            <div class="content-options">
+                <button class="content-option" data-rating="kids">
+                    <span class="option-icon">&#127752;</span>
+                    <span class="option-title">FULLY KID-FRIENDLY</span>
+                    <span class="option-desc">Cute, colorful, cartoon-style fusions. No surreal elements.</span>
+                </button>
+
+                <button class="content-option recommended" data-rating="pg">
+                    <span class="option-badge">RECOMMENDED</span>
+                    <span class="option-icon">&#128522;</span>
+                    <span class="option-title">CLASSIC BRAINROT (PG)</span>
+                    <span class="option-desc">Original meme aesthetic, surreal but fun. Weird animal-object hybrids, kid-safe.</span>
+                </button>
+
+                <button class="content-option" data-rating="pg13">
+                    <span class="option-icon">&#128064;</span>
+                    <span class="option-title">FULL SURREALISM (PG-13)</span>
+                    <span class="option-desc">Maximum absurdity, true brainrot energy. Recommended for teens+.</span>
+                </button>
+            </div>
+
+            <div class="api-key-section">
+                <details>
+                    <summary>&#9881; Advanced: API Key Setup</summary>
+                    <div class="api-key-content">
+                        <p>For AI-generated fusion images, enter your Gemini API key:</p>
+                        <input type="password" id="api-key-input" placeholder="Enter Gemini API Key" />
+                        <small>Get yours free at <a href="https://aistudio.google.com/" target="_blank">aistudio.google.com</a></small>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <!-- STARTER SELECTION SCREEN -->
+    <div id="starter-screen" class="screen">
+        <div class="title-container">
+            <h1 class="game-title">ITALIAN BRAINROT</h1>
+            <h2 class="game-subtitle">MIXING MOD</h2>
+            <p class="tagline">by Luka & Pappa</p>
+        </div>
+
+        <div class="starter-instructions">
+            <p>Pick 3 Starter Characters!</p>
+            <p class="selected-count">Selected: <span id="selected-count">0</span>/3</p>
+        </div>
+
+        <div id="starter-grid" class="character-grid">
+            <!-- Starter characters will be inserted here by JS -->
+        </div>
+
+        <button id="start-game-btn" class="big-button" disabled>
+            START MIXING!
+        </button>
+    </div>
+
+    <!-- MAIN GAME SCREEN -->
+    <div id="game-screen" class="screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-icon">&#127942;</span>
+                <span class="status-label">Fame:</span>
+                <span id="total-fame" class="status-value">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">&#128176;</span>
+                <span class="status-label">Coins:</span>
+                <span id="total-coins" class="status-value">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">&#11088;</span>
+                <span class="status-label">Mixes:</span>
+                <span id="mix-count" class="status-value">0</span>
+            </div>
+        </div>
+
+        <!-- Mixing Bowl Area -->
+        <div class="mixing-area">
+            <h2 class="section-title">MIXING BOWL</h2>
+            <div id="mixing-bowl" class="mixing-bowl">
+                <div id="slot-1" class="mix-slot" data-slot="1">
+                    <span class="slot-label">Drop Here</span>
+                </div>
+                <div class="mix-operator">+</div>
+                <div id="slot-2" class="mix-slot" data-slot="2">
+                    <span class="slot-label">Drop Here</span>
+                </div>
+            </div>
+            <button id="mix-button" class="mix-button" disabled>
+                MIX!
+            </button>
+        </div>
+
+        <!-- Result Display -->
+        <div id="result-area" class="result-area hidden">
+            <h3>NEW CHARACTER!</h3>
+            <div id="result-character" class="result-character">
+                <!-- Result will be shown here -->
+            </div>
+            <button id="collect-btn" class="collect-button">COLLECT!</button>
+        </div>
+
+        <!-- Collection Area -->
+        <div class="collection-area">
+            <h2 class="section-title">YOUR COLLECTION</h2>
+            <div id="collection-grid" class="character-grid">
+                <!-- Collection characters will be inserted here by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- FINAL BOSS SCREEN -->
+    <div id="boss-screen" class="screen">
+        <div class="boss-container">
+            <h1 class="boss-title">YOU ARE THE FINAL BOSS!</h1>
+            <div id="final-boss-display" class="final-boss-display">
+                <!-- Final boss character will be shown here -->
+            </div>
+            <div class="infinity-coins">
+                <span class="infinity-symbol">&infin;</span>
+                <span class="infinity-label">INFINITY COINS</span>
+            </div>
+            <div class="endgame-buttons">
+                <button id="new-game-plus-btn" class="endgame-button">New Game+</button>
+                <button id="sandbox-btn" class="endgame-button">Sandbox Mode</button>
+                <button id="share-btn" class="endgame-button">Share & Challenge</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="mix-sound" preload="auto"></audio>
+    <audio id="success-sound" preload="auto"></audio>
+    <audio id="character-sound" preload="auto"></audio>
+    <audio id="bg-music" loop preload="auto"></audio>
+
+    <!-- Scripts -->
+    <script type="module" src="js/game.js"></script>
+</body>
+</html>
