@@ -17,7 +17,7 @@
 ## How to Play
 
 1. **Pick 3 Starters** - Choose your initial brainrot characters
-2. **Drag to Mix** - Drop characters into the Mixing Bowl
+2. **Drag or Tap to Mix** - Drop characters into the Mixing Bowl (or tap on mobile)
 3. **MIX!** - Create new hybrid characters
 4. **Build Fame** - Higher tier combos = more fame points
 5. **Become the FINAL BOSS** - Mix enough to achieve ultimate power!
@@ -47,14 +47,16 @@ italian-brainrot-mixing-mod/
 │   └── styles.css          # Meme aesthetic + Parents Zone styling
 ├── js/
 │   ├── mersenne.js         # MT19937 RNG (from Qwartel)
-│   ├── game.js             # Main game logic + Parents Zone flow
-│   ├── characters.js       # Character definitions + wiki URLs
+│   ├── game.js             # Main game logic + Parents Zone + lightbox + particles
+│   ├── characters.js       # Character definitions + wiki URLs + local image paths
 │   ├── mixing.js           # Mixing algorithm
 │   ├── gemini-api.js       # Google Gemini API wrapper
 │   ├── image-generator.js  # AI fusion image generation + IndexedDB cache
 │   └── audio.js            # Web Audio API + synthesized SFX
+├── scripts/
+│   └── generate-portraits.mjs  # Gemini portrait generation (40 characters)
 ├── assets/
-│   ├── images/             # Character meme images
+│   ├── images/             # Character portraits (generated via scripts/)
 │   │   └── generated/      # AI-generated fusion images (gitignored)
 │   ├── audio/              # Sound files (optional, synth fallback)
 │   │   ├── names/          # Character name audio
@@ -160,7 +162,7 @@ Predefined recipes with bonus fame:
 ### Phase 1: MVP
 - [x] Project setup
 - [x] 10 starter characters
-- [x] Drag-and-drop mixing
+- [x] Drag-and-drop mixing (desktop + mobile tap-to-place)
 - [x] Fame points
 - [x] Final Boss mechanic
 - [x] Infinity coins
@@ -190,6 +192,9 @@ Predefined recipes with bonus fame:
 - [x] 40 characters (10 original + 30 new)
 - [x] 13 special combos (3 original + 10 new)
 - [x] Balanced tier distribution
+- [x] Gemini-generated character portraits (scripts/generate-portraits.mjs)
+- [x] Local image support with fallback chain (generated > local > wiki > emoji)
+- [x] Fullscreen image lightbox
 - [ ] Wiki mining script for 100+ characters
 - [ ] Daily challenges rotation
 
@@ -314,7 +319,55 @@ From Qwartel (Pappa's Afrikaans Wordle game):
 
 - Modern browsers (ES modules)
 - Mobile-friendly (responsive CSS)
-- Touch events for drag-drop
+- Tap-to-place for mobile (no drag-drop needed)
+- Desktop drag-and-drop with child element fix
+
+### Character Portrait Generation
+
+Generate all 40 character portraits locally using Gemini:
+
+```bash
+# Add your API key to .env
+echo "GEMINI_API_KEY=your-key" > .env
+
+# Generate all portraits (~4 min, rate limited)
+node scripts/generate-portraits.mjs
+```
+
+- Outputs to `assets/images/{character-id}.png`
+- Idempotent: skips existing images
+- Fallback model on 404
+- Prompts reference Italian Brainrot meme universe
+
+### Image Priority Chain
+
+```
+generatedImage (AI fusion) > localImage (portrait) > wikiImageUrl > emoji
+```
+
+### Tap-to-Place (Mobile)
+
+Mobile users can't drag-and-drop reliably. Instead:
+1. Tap a character card (green glow indicates selection)
+2. Tap an empty mix slot (pulsing green glow)
+3. Card is placed in slot
+4. Tap same card again to deselect
+
+### Lightbox
+
+Click/tap any character image to view fullscreen:
+- 90vw/75vh max size
+- Close via backdrop click, X button, or Escape key
+- Gold border with caption
+
+### Visual Enhancements
+
+- Glassmorphism cards (backdrop-filter blur)
+- Animated tier borders (legendary rotates, mythic dual-glow, epic shimmer)
+- Animated background gradient blobs with hue-rotate
+- Particle burst on mix success (tier-colored, gold for special combos)
+- Screen transitions (fade up/down)
+- Loading spinner during Gemini image generation
 
 ## Credits
 

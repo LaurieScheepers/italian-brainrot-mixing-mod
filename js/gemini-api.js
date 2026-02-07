@@ -214,6 +214,32 @@ export class GeminiAPI {
     }
 }
 
+// Obfuscation salt (XOR-based, prevents casual localStorage inspection)
+const _SALT = 'BrainrotMixingMod2024!';
+
+/**
+ * Obfuscate a key using XOR + Base64
+ */
+function obfuscateKey(key) {
+    let result = '';
+    for (let i = 0; i < key.length; i++) {
+        result += String.fromCharCode(key.charCodeAt(i) ^ _SALT.charCodeAt(i % _SALT.length));
+    }
+    return btoa(result);
+}
+
+/**
+ * Deobfuscate a stored key
+ */
+function deobfuscateKey(stored) {
+    const decoded = atob(stored);
+    let result = '';
+    for (let i = 0; i < decoded.length; i++) {
+        result += String.fromCharCode(decoded.charCodeAt(i) ^ _SALT.charCodeAt(i % _SALT.length));
+    }
+    return result;
+}
+
 // Singleton instance
 let geminiInstance = null;
 
@@ -231,17 +257,31 @@ export function getGeminiAPI(apiKey = null) {
  * Initialize Gemini API from localStorage or input
  */
 export function initGeminiFromStorage() {
-    const storedKey = localStorage.getItem('gemini_api_key');
-    if (storedKey) {
-        return getGeminiAPI(storedKey);
+    // Migration: move old plaintext key to obfuscated format
+    const oldKey = localStorage.getItem('gemini_api_key');
+    if (oldKey) {
+        localStorage.setItem('_gk', obfuscateKey(oldKey));
+        localStorage.removeItem('gemini_api_key');
+        return getGeminiAPI(oldKey);
+    }
+
+    const storedObfuscated = localStorage.getItem('_gk');
+    if (storedObfuscated) {
+        try {
+            const apiKey = deobfuscateKey(storedObfuscated);
+            return getGeminiAPI(apiKey);
+        } catch (e) {
+            console.warn('Failed to deobfuscate stored key, clearing');
+            localStorage.removeItem('_gk');
+        }
     }
     return null;
 }
 
 /**
- * Save API key to localStorage
+ * Save API key to localStorage (obfuscated)
  */
 export function saveApiKey(apiKey) {
-    localStorage.setItem('gemini_api_key', apiKey);
+    localStorage.setItem('_gk', obfuscateKey(apiKey));
     return getGeminiAPI(apiKey);
 }

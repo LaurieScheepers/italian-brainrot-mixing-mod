@@ -60,6 +60,7 @@
 
     <!-- STARTER SELECTION SCREEN -->
     <div id="starter-screen" class="screen">
+        <button id="settings-btn" class="settings-button" title="Settings">&#9881;</button>
         <div class="title-container">
             <h1 class="game-title">ITALIAN BRAINROT</h1>
             <h2 class="game-subtitle">MIXING MOD</h2>
@@ -165,6 +166,16 @@
                 <button id="sandbox-btn" class="endgame-button">Sandbox Mode</button>
                 <button id="share-btn" class="endgame-button">Share & Challenge</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Overlay -->
+    <div id="lightbox" class="lightbox hidden">
+        <div class="lightbox-backdrop"></div>
+        <div class="lightbox-content">
+            <button class="lightbox-close">&times;</button>
+            <img id="lightbox-image" src="" alt="">
+            <div id="lightbox-caption" class="lightbox-caption"></div>
         </div>
     </div>
 

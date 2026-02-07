@@ -45,6 +45,9 @@ const state = {
     challengeSeed: null
 };
 
+// Tap-to-place state (mobile support)
+let selectedForMix = null;
+
 // DOM Elements
 let elements = {};
 
@@ -75,7 +78,7 @@ function addAudioControls() {
 function loadSavedPreferences() {
     // Check if user has already set preferences
     const savedRating = localStorage.getItem('contentRating');
-    const savedApiKey = localStorage.getItem('gemini_api_key');
+    const savedApiKey = localStorage.getItem('_gk') || localStorage.getItem('gemini_api_key');
 
     if (savedRating) {
         state.contentRating = savedRating;
@@ -111,6 +114,7 @@ function cacheElements() {
         apiKeyInput: document.getElementById('api-key-input'),
 
         // Starter screen
+        settingsBtn: document.getElementById('settings-btn'),
         starterGrid: document.getElementById('starter-grid'),
         selectedCount: document.getElementById('selected-count'),
         startGameBtn: document.getElementById('start-game-btn'),
@@ -134,6 +138,11 @@ function cacheElements() {
         sandboxBtn: document.getElementById('sandbox-btn'),
         shareBtn: document.getElementById('share-btn'),
 
+        // Lightbox
+        lightbox: document.getElementById('lightbox'),
+        lightboxImage: document.getElementById('lightbox-image'),
+        lightboxCaption: document.getElementById('lightbox-caption'),
+
         // Social features
         challengeBanner: document.getElementById('challenge-banner'),
         challengeSeedDisplay: document.getElementById('challenge-seed'),
@@ -155,6 +164,16 @@ function setupEventListeners() {
     elements.apiKeyInput?.addEventListener('change', handleApiKeyInput);
     elements.apiKeyInput?.addEventListener('blur', handleApiKeyInput);
 
+    // Settings button (back to Parents Zone)
+    elements.settingsBtn?.addEventListener('click', () => {
+        // Reset content option highlights
+        elements.contentOptions.forEach(btn => {
+            btn.style.transform = '';
+            btn.style.boxShadow = '';
+        });
+        switchScreen('parents-zone');
+    });
+
     // Start game button
     elements.startGameBtn.addEventListener('click', startGame);
 
@@ -170,10 +189,19 @@ function setupEventListeners() {
     elements.shareBtn?.addEventListener('click', shareChallenge);
 
     // Drag and drop for mixing bowl slots
-    [elements.slot1, elements.slot2].forEach(slot => {
+    [elements.slot1, elements.slot2].forEach((slot, i) => {
         slot.addEventListener('dragover', handleDragOver);
         slot.addEventListener('dragleave', handleDragLeave);
         slot.addEventListener('drop', handleDrop);
+        // Tap-to-place: clicking a slot places the selected card
+        slot.addEventListener('click', () => handleSlotTap(i));
+    });
+
+    // Lightbox
+    elements.lightbox?.querySelector('.lightbox-backdrop')?.addEventListener('click', closeLightbox);
+    elements.lightbox?.querySelector('.lightbox-close')?.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
     });
 
     // Social feature buttons
@@ -246,18 +274,27 @@ function createCharacterCard(char, mode = 'collection') {
         card.draggable = true;
         card.addEventListener('dragstart', handleDragStart);
         card.addEventListener('dragend', handleDragEnd);
+        // Tap-to-place for mobile
+        card.addEventListener('click', (e) => {
+            // Don't trigger tap if clicking lightbox image
+            if (e.target.closest('.character-image img')) return;
+            handleCardTap(char.id);
+        });
     } else if (mode === 'starter') {
         card.addEventListener('click', () => toggleStarterSelection(char.id));
     }
 
     const fame = calculateDisplayFame(char);
 
-    // Use generated image, wiki image, or emoji fallback
+    // Image priority: generated (AI fusion) > local portrait > wiki > emoji
     let imageContent;
+    const imgStyle = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;';
     if (char.generatedImage) {
-        imageContent = `<img src="${char.generatedImage}" alt="${char.name}" style="width: 100%; height: 100%; border-radius: 10px; object-fit: cover;">`;
+        imageContent = `<img src="${char.generatedImage}" alt="${char.name}" style="${imgStyle}">`;
+    } else if (char.localImage) {
+        imageContent = `<img src="${char.localImage}" alt="${char.name}" style="${imgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
     } else if (char.wikiImageUrl) {
-        imageContent = `<img src="${char.wikiImageUrl}" alt="${char.name}" style="width: 100%; height: 100%; border-radius: 10px; object-fit: cover;" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
+        imageContent = `<img src="${char.wikiImageUrl}" alt="${char.name}" style="${imgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
     } else {
         imageContent = char.emoji;
     }
@@ -266,8 +303,18 @@ function createCharacterCard(char, mode = 'collection') {
         <span class="tier-badge ${tierClass}">${char.tier}</span>
         <div class="character-image">${imageContent}</div>
         <div class="character-name">${char.name}</div>
-        <div class="character-fame">⭐ ${fame.toLocaleString()}</div>
+        <div class="character-fame">${fame.toLocaleString()}</div>
     `;
+
+    // Lightbox: click image to view fullscreen
+    const imgEl = card.querySelector('.character-image img');
+    if (imgEl) {
+        imgEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openLightbox(imgEl.src, char.name);
+        });
+        imgEl.style.cursor = 'zoom-in';
+    }
 
     return card;
 }
@@ -342,15 +389,107 @@ function startGame() {
 }
 
 /**
- * Switch between screens
+ * Open lightbox with image
+ */
+function openLightbox(imageSrc, caption) {
+    if (!elements.lightbox) return;
+    elements.lightboxImage.src = imageSrc;
+    elements.lightboxImage.alt = caption;
+    elements.lightboxCaption.textContent = caption;
+    elements.lightbox.classList.remove('hidden');
+}
+
+/**
+ * Close lightbox
+ */
+function closeLightbox() {
+    if (!elements.lightbox) return;
+    elements.lightbox.classList.add('hidden');
+    elements.lightboxImage.src = '';
+}
+
+/**
+ * Handle tapping a collection card (tap-to-place for mobile)
+ */
+function handleCardTap(charId) {
+    const char = state.collection.find(c => c.id === charId);
+    if (!char) return;
+
+    // If same card tapped again, deselect
+    if (selectedForMix === charId) {
+        selectedForMix = null;
+        clearTapSelection();
+        return;
+    }
+
+    // Select this card
+    selectedForMix = charId;
+    playSelect();
+
+    // Update visual selection
+    document.querySelectorAll('#collection-grid .character-card').forEach(card => {
+        card.classList.toggle('selected-for-mix', card.dataset.characterId === charId);
+    });
+
+    // Pulse empty/available slots
+    [elements.slot1, elements.slot2].forEach((slot, i) => {
+        const otherSlot = i === 0 ? 1 : 0;
+        const isAvailable = !state.mixSlots[i] || (state.mixSlots[otherSlot]?.id !== charId);
+        slot.classList.toggle('awaiting-tap', isAvailable && !state.mixSlots[i]);
+    });
+}
+
+/**
+ * Handle tapping a mix slot (places selected card)
+ */
+function handleSlotTap(slotIndex) {
+    if (!selectedForMix) return;
+
+    const char = state.collection.find(c => c.id === selectedForMix);
+    if (!char) return;
+
+    // Check if already in other slot
+    const otherSlot = slotIndex === 0 ? 1 : 0;
+    if (state.mixSlots[otherSlot]?.id === selectedForMix) {
+        const slotEl = slotIndex === 0 ? elements.slot1 : elements.slot2;
+        slotEl.classList.add('shake');
+        setTimeout(() => slotEl.classList.remove('shake'), 500);
+        playError();
+        return;
+    }
+
+    // Place in slot
+    state.mixSlots[slotIndex] = char;
+    const slotEl = slotIndex === 0 ? elements.slot1 : elements.slot2;
+    updateSlotDisplay(slotEl, char);
+    updateMixButton();
+    playDrop();
+    playCharacterName(selectedForMix);
+
+    // Clear selection
+    selectedForMix = null;
+    clearTapSelection();
+}
+
+/**
+ * Clear tap-to-place visual state
+ */
+function clearTapSelection() {
+    document.querySelectorAll('.character-card.selected-for-mix').forEach(card => {
+        card.classList.remove('selected-for-mix');
+    });
+    [elements.slot1, elements.slot2].forEach(slot => {
+        slot.classList.remove('awaiting-tap');
+    });
+}
+
+/**
+ * Switch between screens with transition
  */
 function switchScreen(screenName) {
+    const currentScreen = document.querySelector('.screen.active');
     state.screen = screenName;
 
-    // Hide all screens
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-
-    // Show target screen
     const targetScreen = {
         'parents-zone': elements.parentsZoneScreen,
         'starter': elements.starterScreen,
@@ -358,8 +497,50 @@ function switchScreen(screenName) {
         'boss': elements.bossScreen
     }[screenName];
 
-    if (targetScreen) {
-        targetScreen.classList.add('active');
+    if (!targetScreen) return;
+
+    if (currentScreen && currentScreen !== targetScreen) {
+        currentScreen.classList.add('screen-exit');
+        setTimeout(() => {
+            currentScreen.classList.remove('active', 'screen-exit');
+            targetScreen.classList.add('active', 'screen-enter');
+            setTimeout(() => targetScreen.classList.remove('screen-enter'), 300);
+        }, 300);
+    } else {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        targetScreen.classList.add('active', 'screen-enter');
+        setTimeout(() => targetScreen.classList.remove('screen-enter'), 300);
+    }
+}
+
+/**
+ * Spawn particle burst effect
+ */
+function spawnParticles(container, count = 25, color = null) {
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+
+        // Random direction
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+        const distance = 60 + Math.random() * 80;
+        const px = Math.cos(angle) * distance;
+        const py = Math.sin(angle) * distance;
+
+        particle.style.setProperty('--px', `${px}px`);
+        particle.style.setProperty('--py', `${py}px`);
+        particle.style.left = `${centerX}px`;
+        particle.style.top = `${centerY}px`;
+        particle.style.backgroundColor = color || `hsl(${Math.random() * 360}, 80%, 60%)`;
+
+        container.style.position = 'relative';
+        container.appendChild(particle);
+
+        setTimeout(() => particle.remove(), 800);
     }
 }
 
@@ -388,13 +569,16 @@ function updateStats() {
  * Drag and drop handlers
  */
 function handleDragStart(e) {
-    e.target.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', e.target.dataset.characterId);
+    const card = e.target.closest('.character-card');
+    if (!card) return;
+    card.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', card.dataset.characterId);
     e.dataTransfer.effectAllowed = 'move';
 }
 
 function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
+    const card = e.target.closest('.character-card');
+    if (card) card.classList.remove('dragging');
 }
 
 function handleDragOver(e) {
@@ -441,8 +625,20 @@ function handleDrop(e) {
  */
 function updateSlotDisplay(slotElement, char) {
     slotElement.classList.add('filled');
+    // Show image in slot if available
+    let slotImage;
+    const slotImgStyle = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;';
+    if (char.generatedImage) {
+        slotImage = `<img src="${char.generatedImage}" alt="${char.name}" style="${slotImgStyle}">`;
+    } else if (char.localImage) {
+        slotImage = `<img src="${char.localImage}" alt="${char.name}" style="${slotImgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
+    } else if (char.wikiImageUrl) {
+        slotImage = `<img src="${char.wikiImageUrl}" alt="${char.name}" style="${slotImgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
+    } else {
+        slotImage = char.emoji;
+    }
     slotElement.innerHTML = `
-        <div class="character-image">${char.emoji}</div>
+        <div class="character-image" style="width: 60px; height: 60px; font-size: 2rem;">${slotImage}</div>
         <div class="character-name" style="font-size: 0.7rem;">${char.name}</div>
     `;
 }
@@ -494,6 +690,10 @@ async function performMix() {
         // Try to generate AI fusion image
         if (state.geminiConfigured) {
             elements.mixButton.textContent = 'GENERATING...';
+            // Show spinner in result area while generating
+            elements.resultArea.classList.remove('hidden');
+            elements.resultCharacter.innerHTML = '<div class="generating-spinner"></div><p style="color: var(--accent-gold); font-family: Bangers, cursive;">Generating fusion...</p>';
+            elements.collectBtn.style.display = 'none';
             try {
                 const imageGenerator = getImageGenerator();
                 const fusionImage = await imageGenerator.getFusionImage(char1, char2);
@@ -503,6 +703,7 @@ async function performMix() {
             } catch (error) {
                 console.warn('Image generation failed:', error);
             }
+            elements.collectBtn.style.display = '';
         }
 
         state.lastResult = result;
@@ -536,10 +737,16 @@ async function performMix() {
 function showResult(char, isSpecial) {
     const fame = calculateDisplayFame(char);
 
-    // Use generated image if available, otherwise emoji
-    const imageContent = char.generatedImage
-        ? `<img src="${char.generatedImage}" alt="${char.name}" style="width: 100px; height: 100px; border-radius: 10px; object-fit: cover;">`
-        : char.emoji;
+    // Image priority for result display
+    let imageContent;
+    const resultImgStyle = 'width: 100px; height: 100px; border-radius: 10px; object-fit: cover;';
+    if (char.generatedImage) {
+        imageContent = `<img src="${char.generatedImage}" alt="${char.name}" style="${resultImgStyle}">`;
+    } else if (char.localImage) {
+        imageContent = `<img src="${char.localImage}" alt="${char.name}" style="${resultImgStyle}">`;
+    } else {
+        imageContent = char.emoji;
+    }
 
     elements.resultCharacter.innerHTML = `
         <div class="character-card ${char.tier.toLowerCase()}" style="width: auto; max-width: 200px; margin: 0 auto;">
@@ -558,6 +765,18 @@ function showResult(char, isSpecial) {
     `;
 
     elements.resultArea.classList.remove('hidden');
+
+    // Particle burst on mix success
+    const tierColors = {
+        COMMON: '#888888',
+        RARE: '#3498db',
+        EPIC: '#9b59b6',
+        LEGENDARY: '#f39c12',
+        MYTHIC: '#ff6b9d'
+    };
+    const particleColor = isSpecial ? '#ffd700' : (tierColors[char.tier] || '#ffd700');
+    const particleCount = isSpecial ? 35 : 25;
+    setTimeout(() => spawnParticles(elements.resultCharacter, particleCount, particleColor), 100);
 }
 
 /**
@@ -603,9 +822,20 @@ function becomeFinalBoss(finalChar) {
     playFinalBoss();
 
     // Show boss screen
+    // Boss image priority
+    let bossImage;
+    const bossImgStyle = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;';
+    if (finalChar.generatedImage) {
+        bossImage = `<img src="${finalChar.generatedImage}" alt="${finalChar.name}" style="${bossImgStyle}">`;
+    } else if (finalChar.localImage) {
+        bossImage = `<img src="${finalChar.localImage}" alt="${finalChar.name}" style="${bossImgStyle}">`;
+    } else {
+        bossImage = finalChar.emoji;
+    }
+
     elements.finalBossDisplay.innerHTML = `
         <div class="character-card mythic" style="width: auto; max-width: 300px; margin: 0 auto; padding: 20px;">
-            <div class="character-image" style="width: 150px; height: 150px; font-size: 5rem;">${finalChar.emoji}</div>
+            <div class="character-image" style="width: 150px; height: 150px; font-size: 5rem;">${bossImage}</div>
             <div class="character-name" style="font-size: 1.5rem;">${finalChar.name}</div>
             <div class="character-fame" style="font-size: 1.2rem;">⭐ ${calculateDisplayFame(finalChar).toLocaleString()}</div>
             <div style="margin-top: 10px; font-size: 0.9rem;">
