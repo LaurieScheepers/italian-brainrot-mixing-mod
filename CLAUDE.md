@@ -11,7 +11,7 @@
 | Stack | Vanilla HTML/CSS/JS (ES Modules) |
 | RNG | MersenneTwister (from Qwartel) |
 | Source | italianbrainrot.miraheze.org |
-| AI Images | Google Gemini (gemini-2.0-flash-preview-image-generation) |
+| AI Images | Google Gemini (gemini-2.5-flash-image / Nano Banana) |
 | Image Cache | IndexedDB |
 
 ## How to Play
@@ -99,7 +99,19 @@ Achieved when:
 - Generation depth >= 5 (5+ mixes deep)
 - OR Collection >= 20 characters
 
-## Characters (Phase 1 - 10 Starters)
+## Characters (40 Total)
+
+### Tier Distribution
+
+| Tier | Count | Fame Range |
+|------|-------|------------|
+| MYTHIC | 4 | 950-1050 |
+| LEGENDARY | 8 | 820-900 |
+| EPIC | 10 | 600-750 |
+| RARE | 8 | 450-530 |
+| COMMON | 10 | 270-400 |
+
+### Original 10 (Phase 1)
 
 | Name | Tier | Base Fame | Origin |
 |------|------|-----------|--------|
@@ -114,7 +126,16 @@ Achieved when:
 | Glorbo Fruttodrillo | COMMON | 400 | Italian |
 | Boberto Mortadello | COMMON | 350 | Italian |
 
-## Special Combos
+### Phase 4 Additions (30 new)
+
+See `js/characters.js` for full definitions. Highlights include:
+- Re Dei Granchi Imperatore (MYTHIC) - The Crab Emperor
+- Elefantino Pizzaiolo (LEGENDARY) - Pizza-making elephant
+- Serpente Spaghetti Infinito (EPIC) - Spaghetti snake
+- Papera Pirata Corsara (RARE) - Pirate duck
+- Rospo Gondoliere Veneziano (COMMON) - Venetian gondolier toad
+
+## Special Combos (13 Total)
 
 Predefined recipes with bonus fame:
 
@@ -123,6 +144,16 @@ Predefined recipes with bonus fame:
 | Tung Tung + Bombardiro | Tungbardiro Skybasher | +500 |
 | Tralalero + Capuccino | Tralaccino Sharksassin | +400 |
 | Brr Brr + Ballerina | Brrlerina Frostpim | +350 |
+| Elefantino + Drago Gelato | Draghantino Pizzagelato | +450 |
+| Squalo Volante + Pinguino | Squaluino Gladiatore Volante | +420 |
+| Gatto Astronauta + Riccio Razzo | Gattorazzo Cosmonauta | +400 |
+| Re Dei Granchi + Granchio Barbiere | Gran Imperatore Elegantissimo | +380 |
+| Serpente Spaghetti + Coccodrillo | Spaghettococco Gelatoso | +350 |
+| Polipo DJ + Rana Operista | Poliporana Musicale Supremo | +400 |
+| Lupo Espresso + Cavallo Velocista | Lupovallo Turbo Espresso | +380 |
+| Vacca Saturno + Giraffa Celeste | Vaccaffa Cosmica Universale | +500 |
+| Farfalla Ninja + Fenicottero | Farfallottero Ninja Fashion | +350 |
+| Papera Pirata + Rospo Gondoliere | Paperospo Pirata di Venezia | +330 |
 
 ## Roadmap
 
@@ -156,21 +187,53 @@ Predefined recipes with bonus fame:
 - [ ] Real audio file support (assets/audio/)
 
 ### Phase 4: Content
-- [ ] Wiki mining script
-- [ ] 100+ characters
-- [ ] More special combos
-- [ ] Daily challenges
+- [x] 40 characters (10 original + 30 new)
+- [x] 13 special combos (3 original + 10 new)
+- [x] Balanced tier distribution
+- [ ] Wiki mining script for 100+ characters
+- [ ] Daily challenges rotation
 
 ### Phase 5: Social
+- [x] Seed-based share URLs (?seed=&starters=)
+- [x] Daily Challenge mode (deterministic date-based seed)
+- [x] Challenge banner UI
+- [x] Share FAB button
+- [x] Toast notifications
 - [ ] Leaderboards
-- [ ] Share functionality
-- [ ] Seed-based challenges
+- [ ] Persistent high scores
+
+## Social Features
+
+### Share URL Format
+
+```
+https://yoursite.com/?seed=1234567890&starters=char1-id,char2-id,char3-id
+```
+
+- `seed` - Global RNG seed for reproducible mixing results
+- `starters` - Comma-separated character IDs for the 3 starters
+
+### Daily Challenge
+
+- Deterministic seed based on current date: `hash("daily-brainrot-YYYY-M-D")`
+- Same 3 starters selected for all players on the same day
+- Accessible via "DAILY CHALLENGE" button on starter screen
+
+### Share Flow
+
+1. Player reaches Final Boss OR clicks Share FAB during game
+2. Share URL generated with current seed + starter IDs
+3. Web Share API used if available, otherwise clipboard copy
+4. Toast notification confirms share action
 
 ## Tech Notes
 
 ### AI Image Generation
 
 Uses Google Gemini to generate fusion images when mixing:
+
+- **Primary model**: `gemini-2.5-flash-image` (Nano Banana)
+- **Fallback model**: `gemini-2.0-flash-exp-image-generation` (auto on 404)
 
 ```javascript
 // Content rating affects image style
