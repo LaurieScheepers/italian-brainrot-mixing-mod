@@ -1,10 +1,11 @@
 /**
  * Gemini API Wrapper for Italian Brainrot Mixing Mod
- * Uses gemini-3-pro-image-preview (Nano Banana Pro) for fusion image generation
+ * Uses gemini-2.5-flash-image (Nano Banana) for fusion image generation
  */
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
-const GEMINI_MODEL = 'gemini-2.0-flash-exp-image-generation';
+const GEMINI_MODEL = 'gemini-2.5-flash-image';
+const GEMINI_FALLBACK_MODEL = 'gemini-2.0-flash-exp-image-generation';
 
 // Content rating style prompts
 const STYLE_PROMPTS = {
@@ -77,6 +78,7 @@ export class GeminiAPI {
         this.apiKey = apiKey;
         this.requestCount = 0;
         this.lastRequestTime = 0;
+        this.activeModel = GEMINI_MODEL;
     }
 
     /**
@@ -119,54 +121,67 @@ export class GeminiAPI {
 
         const prompt = generateFusionPrompt(parent1, parent2, contentRating);
 
-        try {
-            const response = await fetch(
-                `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${this.apiKey}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: prompt
-                            }]
-                        }],
-                        generationConfig: {
-                            responseModalities: ["TEXT", "IMAGE"]
-                        }
-                    })
+        // Try primary model, fallback on 404
+        const models = [GEMINI_MODEL, GEMINI_FALLBACK_MODEL];
+
+        for (const model of models) {
+            try {
+                const response = await fetch(
+                    `${GEMINI_API_BASE}/models/${model}:generateContent?key=${this.apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: prompt
+                                }]
+                            }],
+                            generationConfig: {
+                                responseModalities: ["TEXT", "IMAGE"]
+                            }
+                        })
+                    }
+                );
+
+                if (response.status === 404) {
+                    console.warn(`Model ${model} not found, trying fallback...`);
+                    continue;
                 }
-            );
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Gemini API error:', response.status, errorText);
-                return null;
-            }
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Gemini API error:', response.status, errorText);
+                    return null;
+                }
 
-            const data = await response.json();
+                const data = await response.json();
 
-            // Extract image from response
-            if (data.candidates && data.candidates[0]?.content?.parts) {
-                for (const part of data.candidates[0].content.parts) {
-                    if (part.inlineData?.mimeType?.startsWith('image/')) {
-                        return {
-                            data: part.inlineData.data,
-                            mimeType: part.inlineData.mimeType
-                        };
+                // Extract image from response
+                if (data.candidates && data.candidates[0]?.content?.parts) {
+                    for (const part of data.candidates[0].content.parts) {
+                        if (part.inlineData?.mimeType?.startsWith('image/')) {
+                            this.activeModel = model;
+                            return {
+                                data: part.inlineData.data,
+                                mimeType: part.inlineData.mimeType
+                            };
+                        }
                     }
                 }
+
+                console.warn('No image in Gemini response:', data);
+                return null;
+
+            } catch (error) {
+                console.error(`Gemini API request failed (${model}):`, error);
+                if (model === GEMINI_FALLBACK_MODEL) return null;
             }
-
-            console.warn('No image in Gemini response:', data);
-            return null;
-
-        } catch (error) {
-            console.error('Gemini API request failed:', error);
-            return null;
         }
+
+        return null;
     }
 
     /**
@@ -183,9 +198,14 @@ export class GeminiAPI {
             );
 
             if (response.ok) {
-                return { success: true };
+                const data = await response.json();
+                const modelNames = (data.models || []).map(m => m.name);
+                const primaryAvailable = modelNames.some(n => n.includes(GEMINI_MODEL));
+                const fallbackAvailable = modelNames.some(n => n.includes(GEMINI_FALLBACK_MODEL));
+                const activeModel = primaryAvailable ? GEMINI_MODEL : (fallbackAvailable ? GEMINI_FALLBACK_MODEL : 'unknown');
+                this.activeModel = activeModel;
+                return { success: true, model: activeModel };
             } else {
-                const errorText = await response.text();
                 return { success: false, error: `API error: ${response.status}` };
             }
         } catch (error) {
