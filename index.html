@@ -75,6 +75,10 @@
             <!-- Starter characters will be inserted here by JS -->
         </div>
 
+        <button id="daily-challenge-btn" class="daily-challenge-button">
+            DAILY CHALLENGE
+        </button>
+
         <button id="start-game-btn" class="big-button" disabled>
             START MIXING!
         </button>
@@ -99,6 +103,12 @@
                 <span class="status-label">Mixes:</span>
                 <span id="mix-count" class="status-value">0</span>
             </div>
+        </div>
+
+        <!-- Challenge Banner (hidden by default) -->
+        <div id="challenge-banner" class="challenge-banner hidden">
+            <span class="challenge-label">CHALLENGE MODE</span>
+            <span class="challenge-seed-label">Seed: <span id="challenge-seed">-</span></span>
         </div>
 
         <!-- Mixing Bowl Area -->
@@ -134,6 +144,9 @@
                 <!-- Collection characters will be inserted here by JS -->
             </div>
         </div>
+
+        <!-- Share FAB -->
+        <button id="share-fab" class="share-fab" title="Share Challenge">&#128279;</button>
     </div>
 
     <!-- FINAL BOSS SCREEN -->

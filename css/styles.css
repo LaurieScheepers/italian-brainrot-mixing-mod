@@ -820,3 +820,146 @@ body {
         font-size: 1.2rem;
     }
 }
+
+/* ========================================
+   SOCIAL FEATURES - Phase 5
+   ======================================== */
+
+/* Share Toast */
+.share-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 12px 24px;
+    border-radius: 30px;
+    border: 2px solid var(--accent-cyan);
+    font-size: 0.95rem;
+    z-index: 2000;
+    animation: toastIn 0.3s ease-out;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.share-toast.fade-out {
+    animation: toastOut 0.3s ease-in forwards;
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes toastOut {
+    from { opacity: 1; transform: translateX(-50%) translateY(0); }
+    to { opacity: 0; transform: translateX(-50%) translateY(20px); }
+}
+
+/* Challenge Banner */
+.challenge-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 10px 20px;
+    margin-bottom: 15px;
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    border: 2px solid;
+    border-image: linear-gradient(90deg, var(--accent-pink), var(--accent-cyan), var(--accent-gold)) 1;
+}
+
+.challenge-label {
+    font-family: 'Bangers', cursive;
+    font-size: 1.2rem;
+    color: var(--accent-gold);
+    letter-spacing: 2px;
+}
+
+.challenge-seed-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-family: monospace;
+}
+
+/* Daily Challenge Button */
+.daily-challenge-button {
+    font-family: 'Bangers', cursive;
+    font-size: 1.3rem;
+    padding: 12px 30px;
+    background: linear-gradient(45deg, var(--accent-pink), var(--accent-gold));
+    border: none;
+    border-radius: 30px;
+    color: var(--bg-primary);
+    cursor: pointer;
+    display: block;
+    margin: 15px auto;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.daily-challenge-button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 25px rgba(255, 107, 157, 0.6);
+}
+
+/* Share FAB */
+.share-fab {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-gold);
+    background: var(--bg-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.share-fab:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+    background: var(--accent-gold);
+    color: var(--bg-primary);
+}
+
+/* Mobile Social Features */
+@media (max-width: 600px) {
+    .challenge-banner {
+        flex-direction: column;
+        gap: 5px;
+        padding: 8px 15px;
+    }
+
+    .challenge-label {
+        font-size: 1rem;
+    }
+
+    .daily-challenge-button {
+        font-size: 1.1rem;
+        padding: 10px 25px;
+    }
+
+    .share-fab {
+        bottom: 70px;
+        right: 10px;
+        width: 48px;
+        height: 48px;
+        font-size: 1.3rem;
+    }
+
+    .share-toast {
+        bottom: 130px;
+        font-size: 0.85rem;
+        padding: 10px 18px;
+    }
+}

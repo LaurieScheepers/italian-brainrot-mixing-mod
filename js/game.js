@@ -4,7 +4,7 @@
  */
 
 import { getAllBaseCharacters, getTierInfo, calculateDisplayFame } from './characters.js';
-import { mixCharacters, checkSpecialCombo, applySpecialCombo } from './mixing.js';
+import { mixCharacters, checkSpecialCombo, applySpecialCombo, hashString } from './mixing.js';
 import { MersenneTwister } from './mersenne.js';
 import { getGeminiAPI, saveApiKey, initGeminiFromStorage } from './gemini-api.js';
 import { getImageGenerator } from './image-generator.js';
@@ -40,7 +40,9 @@ const state = {
     mixSlots: [null, null],
     lastResult: null,
     isFinalBoss: false,
-    geminiConfigured: false
+    geminiConfigured: false,
+    isChallenge: false,
+    challengeSeed: null
 };
 
 // DOM Elements
@@ -52,10 +54,11 @@ let elements = {};
 function init() {
     cacheElements();
     setupEventListeners();
+    parseShareURL();
     loadSavedPreferences();
     addAudioControls();
-    console.log('🇮🇹 Italian Brainrot Mixing Mod initialized!');
-    console.log('🎮 Created by Luka & Pappa');
+    console.log('Italian Brainrot Mixing Mod initialized!');
+    console.log('Created by Luka & Pappa');
 }
 
 /**
@@ -129,7 +132,13 @@ function cacheElements() {
         finalBossDisplay: document.getElementById('final-boss-display'),
         newGamePlusBtn: document.getElementById('new-game-plus-btn'),
         sandboxBtn: document.getElementById('sandbox-btn'),
-        shareBtn: document.getElementById('share-btn')
+        shareBtn: document.getElementById('share-btn'),
+
+        // Social features
+        challengeBanner: document.getElementById('challenge-banner'),
+        challengeSeedDisplay: document.getElementById('challenge-seed'),
+        dailyChallengeBtn: document.getElementById('daily-challenge-btn'),
+        shareFab: document.getElementById('share-fab')
     };
 }
 
@@ -166,6 +175,10 @@ function setupEventListeners() {
         slot.addEventListener('dragleave', handleDragLeave);
         slot.addEventListener('drop', handleDrop);
     });
+
+    // Social feature buttons
+    elements.dailyChallengeBtn?.addEventListener('click', startDailyChallenge);
+    elements.shareFab?.addEventListener('click', shareChallenge);
 }
 
 /**
@@ -314,6 +327,14 @@ function startGame() {
 
     // Switch screens
     switchScreen('game');
+
+    // Show challenge banner if in challenge mode
+    if (state.isChallenge && elements.challengeBanner) {
+        elements.challengeBanner.classList.remove('hidden');
+        if (elements.challengeSeedDisplay) {
+            elements.challengeSeedDisplay.textContent = state.challengeSeed || state.globalSeed;
+        }
+    }
 
     // Render collection
     renderCollection();
@@ -623,22 +644,120 @@ function enterSandbox() {
 }
 
 function shareChallenge() {
-    const shareText = `🇮🇹 I became the FINAL BOSS in Italian Brainrot Mixing Mod!\n` +
-        `⭐ Fame: ${state.totalFame.toLocaleString()}\n` +
-        `🔄 Mixes: ${state.mixCount}\n` +
-        `📦 Collection: ${state.collection.length} characters\n` +
-        `🌱 Seed: ${state.globalSeed}\n\n` +
-        `Can you beat my score?`;
+    // Build share URL with seed and starters
+    const url = new URL(window.location.href.split('?')[0]);
+    url.searchParams.set('seed', state.globalSeed);
+    url.searchParams.set('starters', state.selectedStarters.join(','));
+
+    const shareText = `I became the FINAL BOSS in Italian Brainrot Mixing Mod!\n` +
+        `Fame: ${state.totalFame.toLocaleString()}\n` +
+        `Mixes: ${state.mixCount}\n` +
+        `Collection: ${state.collection.length} characters\n\n` +
+        `Challenge me: ${url.toString()}`;
 
     if (navigator.share) {
         navigator.share({
             title: 'Italian Brainrot Mixing Mod',
-            text: shareText
+            text: shareText,
+            url: url.toString()
         });
     } else {
-        navigator.clipboard.writeText(shareText);
-        alert('Copied to clipboard! Share with your friends!');
+        navigator.clipboard.writeText(shareText).then(() => {
+            showToast('Challenge link copied to clipboard!');
+        });
     }
+}
+
+/**
+ * Parse share URL query parameters
+ */
+function parseShareURL() {
+    const params = new URLSearchParams(window.location.search);
+    const seed = params.get('seed');
+    const starters = params.get('starters');
+
+    if (seed && starters) {
+        state.globalSeed = parseInt(seed, 10);
+        state.challengeSeed = seed;
+        state.isChallenge = true;
+        state.selectedStarters = starters.split(',').filter(Boolean);
+
+        // Validate starters exist
+        const allChars = getAllBaseCharacters();
+        state.selectedStarters = state.selectedStarters.filter(id =>
+            allChars.some(c => c.id === id)
+        );
+
+        if (state.selectedStarters.length === 3) {
+            // Skip parents zone and starter selection, go straight to game
+            const savedRating = localStorage.getItem('contentRating');
+            if (savedRating) {
+                state.contentRating = savedRating;
+            }
+            // Defer start to after DOM is fully ready
+            setTimeout(() => {
+                startGame();
+                showToast('Challenge loaded! Same seed = same results');
+            }, 100);
+        }
+    }
+}
+
+/**
+ * Get a deterministic daily challenge seed based on today's date
+ */
+function getDailyChallengeSeed() {
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    return hashString(`daily-brainrot-${dateStr}`);
+}
+
+/**
+ * Start the daily challenge
+ */
+function startDailyChallenge() {
+    const seed = getDailyChallengeSeed();
+    const rng = new MersenneTwister(seed);
+    const allChars = getAllBaseCharacters();
+
+    // Pick 3 deterministic starters from the full roster
+    const starterIndices = new Set();
+    while (starterIndices.size < 3) {
+        starterIndices.add(rng.random_int31() % allChars.length);
+    }
+
+    state.globalSeed = seed;
+    state.challengeSeed = seed;
+    state.isChallenge = true;
+    state.selectedStarters = [...starterIndices].map(i => allChars[i].id);
+
+    // Load saved content rating
+    const savedRating = localStorage.getItem('contentRating');
+    if (savedRating) {
+        state.contentRating = savedRating;
+    }
+
+    startGame();
+    showToast('Daily Challenge started! Same starters for everyone today');
+}
+
+/**
+ * Show a styled toast notification
+ */
+function showToast(message, duration = 3000) {
+    // Remove existing toast if any
+    const existing = document.querySelector('.share-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'share-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
 }
 
 // Initialize when DOM is ready
