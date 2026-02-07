@@ -9,7 +9,7 @@ import { TIERS, getTierInfo } from './characters.js';
 /**
  * Simple hash function to combine character IDs into a seed
  */
-function hashString(str) {
+export function hashString(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
@@ -209,6 +209,7 @@ export function mixCharacters(char1, char2, globalSeed = Date.now()) {
  */
 export function checkSpecialCombo(char1, char2) {
     const specialCombos = {
+        // Original 3 combos
         'tung-tung-tung-sahur+bombardiro-crocodilo': {
             bonusFame: 500,
             specialName: 'Tungbardiro Skybasher'
@@ -220,6 +221,47 @@ export function checkSpecialCombo(char1, char2) {
         'brr-brr-patapim+ballerina-cappuccina': {
             bonusFame: 350,
             specialName: 'Brrlerina Frostpim'
+        },
+        // Phase 4: 10 new combos
+        'elefantino-pizzaiolo+drago-gelato-infernale': {
+            bonusFame: 450,
+            specialName: 'Draghantino Pizzagelato'
+        },
+        'squalo-volante-magnifico+pinguino-gladiatore-romano': {
+            bonusFame: 420,
+            specialName: 'Squaluino Gladiatore Volante'
+        },
+        'gatto-astronauta-lunare+riccio-razzo-spaziale': {
+            bonusFame: 400,
+            specialName: 'Gattorazzo Cosmonauta'
+        },
+        're-dei-granchi-imperatore+granchio-barbiere-elegante': {
+            bonusFame: 380,
+            specialName: 'Gran Imperatore Elegantissimo'
+        },
+        'serpente-spaghetti-infinito+coccodrillo-gelataio': {
+            bonusFame: 350,
+            specialName: 'Spaghettococco Gelatoso'
+        },
+        'polipo-DJ-discoteca+rana-operista-soprano': {
+            bonusFame: 400,
+            specialName: 'Poliporana Musicale Supremo'
+        },
+        'lupo-espresso-velocissimo+cavallo-velocista-turbo': {
+            bonusFame: 380,
+            specialName: 'Lupovallo Turbo Espresso'
+        },
+        'la-vacca-saturno-saturnita+giraffa-celeste-astronomica': {
+            bonusFame: 500,
+            specialName: 'Vaccaffa Cosmica Universale'
+        },
+        'farfalla-ninja-silenziosa+fenicottero-fashionista': {
+            bonusFame: 350,
+            specialName: 'Farfallottero Ninja Fashion'
+        },
+        'papera-pirata-corsara+rospo-gondoliere-veneziano': {
+            bonusFame: 330,
+            specialName: 'Paperospo Pirata di Venezia'
         }
     };
 
