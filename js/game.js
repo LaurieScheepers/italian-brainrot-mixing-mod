@@ -8,6 +8,24 @@ import { mixCharacters, checkSpecialCombo, applySpecialCombo } from './mixing.js
 import { MersenneTwister } from './mersenne.js';
 import { getGeminiAPI, saveApiKey, initGeminiFromStorage } from './gemini-api.js';
 import { getImageGenerator } from './image-generator.js';
+import {
+    initAudio,
+    playSelect,
+    playDrop,
+    playMixing,
+    playSuccess,
+    playSpecialCombo,
+    playFinalBoss,
+    playCollect,
+    playError,
+    playCharacterName,
+    playMusic,
+    stopMusic,
+    createAudioControls,
+    toggleMusic,
+    toggleSFX,
+    getAudioState
+} from './audio.js';
 
 // Game State
 const state = {
@@ -35,8 +53,17 @@ function init() {
     cacheElements();
     setupEventListeners();
     loadSavedPreferences();
+    addAudioControls();
     console.log('🇮🇹 Italian Brainrot Mixing Mod initialized!');
     console.log('🎮 Created by Luka & Pappa');
+}
+
+/**
+ * Add audio controls to the UI
+ */
+function addAudioControls() {
+    const controls = createAudioControls();
+    document.body.appendChild(controls);
 }
 
 /**
@@ -241,9 +268,12 @@ function toggleStarterSelection(charId) {
     if (index > -1) {
         // Deselect
         state.selectedStarters.splice(index, 1);
+        playSelect();
     } else if (state.selectedStarters.length < 3) {
         // Select (max 3)
         state.selectedStarters.push(charId);
+        playSelect();
+        playCharacterName(charId);
     }
 
     // Update UI
@@ -373,6 +403,7 @@ function handleDrop(e) {
         // Can't use same character in both slots
         e.currentTarget.classList.add('shake');
         setTimeout(() => e.currentTarget.classList.remove('shake'), 500);
+        playError();
         return;
     }
 
@@ -380,6 +411,8 @@ function handleDrop(e) {
     state.mixSlots[slotIndex] = char;
     updateSlotDisplay(e.currentTarget, char);
     updateMixButton();
+    playDrop();
+    playCharacterName(charId);
 }
 
 /**
@@ -420,6 +453,9 @@ async function performMix() {
     elements.mixButton.disabled = true;
     elements.mixButton.textContent = 'MIXING...';
 
+    // Play mixing sound
+    playMixing();
+
     // Mix after animation
     setTimeout(async () => {
         const char1 = state.mixSlots[0];
@@ -453,6 +489,13 @@ async function performMix() {
 
         // Show result
         showResult(result, specialCombo !== null);
+
+        // Play success or special combo sound
+        if (specialCombo) {
+            playSpecialCombo();
+        } else {
+            playSuccess();
+        }
 
         // Reset slots
         state.mixSlots = [null, null];
@@ -502,6 +545,9 @@ function showResult(char, isSpecial) {
 function collectResult() {
     if (!state.lastResult) return;
 
+    // Play collect sound
+    playCollect();
+
     // Add to collection
     state.collection.push(state.lastResult);
 
@@ -531,6 +577,9 @@ function collectResult() {
  */
 function becomeFinalBoss(finalChar) {
     state.isFinalBoss = true;
+
+    // Play epic fanfare
+    playFinalBoss();
 
     // Show boss screen
     elements.finalBossDisplay.innerHTML = `

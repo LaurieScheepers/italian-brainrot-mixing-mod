@@ -769,3 +769,54 @@ body {
         font-size: 1.1rem;
     }
 }
+
+/* ========================================
+   AUDIO CONTROLS
+   ======================================== */
+
+.audio-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.audio-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-cyan);
+    background: var(--bg-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.audio-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+    background: var(--accent-cyan);
+}
+
+.audio-btn:active {
+    transform: scale(0.95);
+}
+
+/* Mobile Audio Controls */
+@media (max-width: 600px) {
+    .audio-controls {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .audio-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+}

@@ -51,11 +51,12 @@ italian-brainrot-mixing-mod/
 │   ├── characters.js       # Character definitions + wiki URLs
 │   ├── mixing.js           # Mixing algorithm
 │   ├── gemini-api.js       # Google Gemini API wrapper
-│   └── image-generator.js  # AI fusion image generation + IndexedDB cache
+│   ├── image-generator.js  # AI fusion image generation + IndexedDB cache
+│   └── audio.js            # Web Audio API + synthesized SFX
 ├── assets/
 │   ├── images/             # Character meme images
 │   │   └── generated/      # AI-generated fusion images (gitignored)
-│   ├── audio/              # Sound files (TODO)
+│   ├── audio/              # Sound files (optional, synth fallback)
 │   │   ├── names/          # Character name audio
 │   │   ├── music/          # Background music
 │   │   └── sfx/            # Sound effects
@@ -133,7 +134,7 @@ Predefined recipes with bonus fame:
 - [x] Final Boss mechanic
 - [x] Infinity coins
 
-### Phase 2: AI Images (Current)
+### Phase 2: AI Images
 - [x] Parents Zone consent dialogue
 - [x] Content rating system (kids/pg/pg13)
 - [x] Gemini API integration
@@ -142,11 +143,17 @@ Predefined recipes with bonus fame:
 - [x] AI-generated fusion images
 - [x] Fallback to emojis when no API key
 
-### Phase 3: Audio
-- [ ] Character name audio
-- [ ] Mix sound effects
-- [ ] Background music
-- [ ] Victory jingles
+### Phase 3: Audio (Current)
+- [x] Web Audio API sound manager (js/audio.js)
+- [x] Synthesized SFX fallback (no audio files needed)
+- [x] Audio controls UI (music/SFX toggles)
+- [x] Character selection sounds
+- [x] Drop in bowl sounds
+- [x] Mixing swirl sounds
+- [x] Success/special combo jingles
+- [x] Final Boss fanfare
+- [x] Error sounds (same character in both slots)
+- [ ] Real audio file support (assets/audio/)
 
 ### Phase 4: Content
 - [ ] Wiki mining script
@@ -183,6 +190,45 @@ const STYLE_PROMPTS = {
 - Generated images cached in IndexedDB
 - Cache key = sorted parent IDs
 - No regeneration for same combinations
+
+### Audio System
+
+The audio system uses Web Audio API with synthesized fallback sounds:
+
+**Audio Events:**
+- `playSelect()` - Character selected on starter screen
+- `playDrop()` - Character dropped in mixing bowl
+- `playMixing()` - Mixing in progress (swirl sound)
+- `playSuccess()` - Mix complete (C major chord)
+- `playSpecialCombo()` - Special combo detected (arpeggio)
+- `playFinalBoss()` - Become the Final Boss (epic fanfare)
+- `playCollect()` - Add to collection
+- `playError()` - Invalid action (e.g., same character twice)
+- `playCharacterName(id)` - Speak character name (requires audio files)
+
+**Audio Files (Optional):**
+```
+assets/audio/
+├── music/
+│   ├── menu-theme.mp3
+│   ├── game-theme.mp3
+│   └── boss-theme.mp3
+├── sfx/
+│   ├── select.mp3
+│   ├── drop.mp3
+│   ├── mixing.mp3
+│   ├── success.mp3
+│   ├── special-combo.mp3
+│   ├── final-boss.mp3
+│   ├── collect.mp3
+│   └── error.mp3
+└── names/
+    ├── tung-tung-tung-sahur.mp3
+    ├── bombardiro-crocodilo.mp3
+    └── ... (one per character)
+```
+
+If audio files don't exist, synthesized sounds play instead.
 
 ### Parents Zone
 
