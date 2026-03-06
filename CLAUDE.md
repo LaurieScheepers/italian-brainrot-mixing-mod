@@ -369,6 +369,25 @@ Click/tap any character image to view fullscreen:
 - Screen transitions (fade up/down)
 - Loading spinner during Gemini image generation
 
+## Quality Roadmap
+
+Prioritised gaps for development sessions:
+
+| Priority | Gap | Status |
+|----------|-----|--------|
+| P0 | Automated tests for mixing algorithm | TODO |
+| P0 | CI pipeline (GitHub Actions) | TODO |
+| P1 | package.json with test scripts | TODO |
+| P1 | Extract duplicated image rendering (DRY) | TODO |
+| P1 | Collection persistence (localStorage) | TODO |
+| P2 | PWA + service worker | TODO |
+| P2 | Accessibility audit (ARIA, keyboard nav) | TODO |
+| P2 | ESLint config | TODO |
+
+See `docs/ARCHITECTURE-ANALYSIS.md` for full gap analysis.
+See `docs/GRIP-PROMPTS.md` for copy-paste execution prompts.
+See `docs/NOVEL-FEATURES.md` for feature proposals with effort/impact.
+
 ## Credits
 
 - **Game Design**: Luka (age 4.5)
