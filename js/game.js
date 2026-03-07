@@ -28,6 +28,7 @@ import {
     getAudioState
 } from './audio.js';
 import { checkAchievements, getEarnedAchievements, getAllAchievements } from './achievements.js';
+import { renderFamilyTree } from './family-tree.js';
 
 // Progressive unlock thresholds
 const UNLOCK_THRESHOLDS = { 3: 5, 4: 15 }; // slots: mixCount needed
@@ -303,6 +304,9 @@ function setupEventListeners() {
 
     // Combo book button
     document.getElementById('combo-book-btn')?.addEventListener('click', openComboBook);
+
+    // Family tree button
+    document.getElementById('family-tree-btn')?.addEventListener('click', openFamilyTree);
 }
 
 /**
@@ -1237,6 +1241,15 @@ function openComboBook() {
     // Remove existing if open
     document.getElementById('combo-book-modal')?.remove();
     const html = renderComboBook();
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+/**
+ * Open the Family Tree modal
+ */
+function openFamilyTree() {
+    document.getElementById('family-tree-modal')?.remove();
+    const html = renderFamilyTree(state.collection);
     document.body.insertAdjacentHTML('beforeend', html);
 }
 
