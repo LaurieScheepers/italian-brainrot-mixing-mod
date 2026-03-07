@@ -1709,3 +1709,40 @@ body::before {
     font-style: italic;
     padding: 30px;
 }
+
+/* ========================================
+   COLLECTION SORT
+   ======================================== */
+
+.sort-controls {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 8px 0;
+    margin-bottom: 8px;
+}
+
+.sort-btn {
+    font-family: 'Comic Neue', cursive;
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+    background: rgba(45, 27, 78, 0.6);
+    color: #b8b8b8;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sort-btn:hover {
+    border-color: rgba(255, 215, 0, 0.6);
+    color: #fff;
+}
+
+.sort-btn.active {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: #ffd700;
+    color: #ffd700;
+    font-weight: bold;
+}
