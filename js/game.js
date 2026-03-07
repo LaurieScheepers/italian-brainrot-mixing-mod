@@ -27,6 +27,9 @@ import {
     getAudioState
 } from './audio.js';
 
+// Progressive unlock thresholds
+const UNLOCK_THRESHOLDS = { 3: 5, 4: 15 }; // slots: mixCount needed
+
 // Game State
 const state = {
     screen: 'parents-zone',
@@ -36,6 +39,7 @@ const state = {
     totalFame: 0,
     totalCoins: 0,
     mixCount: 0,
+    maxSlots: 2,
     globalSeed: Date.now(),
     mixSlots: [null, null],
     lastResult: null,
@@ -141,8 +145,6 @@ function cacheElements() {
         totalCoins: document.getElementById('total-coins'),
         mixCount: document.getElementById('mix-count'),
         mixingBowl: document.getElementById('mixing-bowl'),
-        slot1: document.getElementById('slot-1'),
-        slot2: document.getElementById('slot-2'),
         mixButton: document.getElementById('mix-button'),
         resultArea: document.getElementById('result-area'),
         resultCharacter: document.getElementById('result-character'),
@@ -205,14 +207,8 @@ function setupEventListeners() {
     elements.sandboxBtn?.addEventListener('click', enterSandbox);
     elements.shareBtn?.addEventListener('click', shareChallenge);
 
-    // Drag and drop for mixing bowl slots
-    [elements.slot1, elements.slot2].forEach((slot, i) => {
-        slot.addEventListener('dragover', handleDragOver);
-        slot.addEventListener('dragleave', handleDragLeave);
-        slot.addEventListener('drop', handleDrop);
-        // Tap-to-place: clicking a slot places the selected card
-        slot.addEventListener('click', () => handleSlotTap(i));
-    });
+    // Drag and drop for mixing bowl slots (dynamic for progressive unlock)
+    setupSlotListeners();
 
     // Lightbox
     elements.lightbox?.querySelector('.lightbox-backdrop')?.addEventListener('click', closeLightbox);
@@ -386,6 +382,9 @@ function startGame() {
     // Switch screens
     switchScreen('game');
 
+    // Render mixing bowl slots for current unlock level
+    renderMixSlots();
+
     // Show challenge banner if in challenge mode
     if (state.isChallenge && elements.challengeBanner) {
         elements.challengeBanner.classList.remove('hidden');
@@ -442,12 +441,16 @@ function handleCardTap(charId) {
         card.classList.toggle('selected-for-mix', card.dataset.characterId === charId);
     });
 
-    // Pulse empty/available slots
-    [elements.slot1, elements.slot2].forEach((slot, i) => {
-        const otherSlot = i === 0 ? 1 : 0;
-        const isAvailable = !state.mixSlots[i] || (state.mixSlots[otherSlot]?.id !== charId);
-        slot.classList.toggle('awaiting-tap', isAvailable && !state.mixSlots[i]);
+    // Pulse empty slots
+    elements.mixingBowl.querySelectorAll('.mix-slot').forEach((slot, i) => {
+        slot.classList.toggle('awaiting-tap', !state.mixSlots[i]);
     });
+
+    // Auto-place if there's an empty slot (KISS for Luka)
+    const emptySlotIdx = state.mixSlots.findIndex(s => s === null);
+    if (emptySlotIdx !== -1) {
+        handleSlotTap(emptySlotIdx);
+    }
 }
 
 /**
@@ -459,19 +462,20 @@ function handleSlotTap(slotIndex) {
     const char = state.collection.find(c => c.id === selectedForMix);
     if (!char) return;
 
-    // Check if already in other slot
-    const otherSlot = slotIndex === 0 ? 1 : 0;
-    if (state.mixSlots[otherSlot]?.id === selectedForMix) {
-        const slotEl = slotIndex === 0 ? elements.slot1 : elements.slot2;
-        slotEl.classList.add('shake');
-        setTimeout(() => slotEl.classList.remove('shake'), 500);
+    // Check if already in another slot
+    if (state.mixSlots.some((s, i) => i !== slotIndex && s?.id === selectedForMix)) {
+        const slotEl = document.getElementById(`slot-${slotIndex + 1}`);
+        if (slotEl) {
+            slotEl.classList.add('shake');
+            setTimeout(() => slotEl.classList.remove('shake'), 500);
+        }
         playError();
         return;
     }
 
     // Place in slot
     state.mixSlots[slotIndex] = char;
-    const slotEl = slotIndex === 0 ? elements.slot1 : elements.slot2;
+    const slotEl = document.getElementById(`slot-${slotIndex + 1}`);
     updateSlotDisplay(slotEl, char);
     updateMixButton();
     playDrop();
@@ -489,9 +493,69 @@ function clearTapSelection() {
     document.querySelectorAll('.character-card.selected-for-mix').forEach(card => {
         card.classList.remove('selected-for-mix');
     });
-    [elements.slot1, elements.slot2].forEach(slot => {
+    elements.mixingBowl.querySelectorAll('.mix-slot').forEach(slot => {
         slot.classList.remove('awaiting-tap');
     });
+}
+
+/**
+ * Render mixing bowl slots dynamically based on maxSlots
+ */
+function renderMixSlots() {
+    const bowl = elements.mixingBowl;
+    bowl.innerHTML = '';
+    state.mixSlots = new Array(state.maxSlots).fill(null);
+
+    for (let i = 0; i < state.maxSlots; i++) {
+        if (i > 0) {
+            const op = document.createElement('div');
+            op.className = 'mix-operator';
+            op.textContent = '+';
+            bowl.appendChild(op);
+        }
+        const slot = document.createElement('div');
+        slot.className = 'mix-slot';
+        slot.dataset.slot = String(i + 1);
+        slot.id = `slot-${i + 1}`;
+        slot.innerHTML = '<span class="slot-label">Drop Here</span>';
+        bowl.appendChild(slot);
+    }
+
+    setupSlotListeners();
+    updateMixButton();
+}
+
+/**
+ * Setup event listeners for all current mix slots
+ */
+function setupSlotListeners() {
+    const slots = elements.mixingBowl.querySelectorAll('.mix-slot');
+    slots.forEach((slot, i) => {
+        slot.addEventListener('dragover', handleDragOver);
+        slot.addEventListener('dragleave', handleDragLeave);
+        slot.addEventListener('drop', handleDrop);
+        slot.addEventListener('click', () => handleSlotTap(i));
+    });
+}
+
+/**
+ * Check and apply progressive unlock
+ */
+function checkProgressiveUnlock() {
+    for (const [slots, threshold] of Object.entries(UNLOCK_THRESHOLDS)) {
+        const slotCount = parseInt(slots);
+        if (state.mixCount >= threshold && state.maxSlots < slotCount) {
+            state.maxSlots = slotCount;
+            renderMixSlots();
+            showToast(`NEW SLOT UNLOCKED! You can now mix ${slotCount} characters!`, 4000);
+            // Particle burst on the new slot
+            const newSlot = document.getElementById(`slot-${slotCount}`);
+            if (newSlot) {
+                newSlot.classList.add('slot-unlock');
+                setTimeout(() => spawnParticles(newSlot, 20, '#ffd700'), 100);
+            }
+        }
+    }
 }
 
 /**
@@ -613,9 +677,8 @@ function handleDrop(e) {
     const char = state.collection.find(c => c.id === charId);
     if (!char) return;
 
-    // Check if already in other slot
-    const otherSlot = slotIndex === 0 ? 1 : 0;
-    if (state.mixSlots[otherSlot]?.id === charId) {
+    // Check if already in another slot
+    if (state.mixSlots.some((s, i) => i !== slotIndex && s?.id === charId)) {
         // Can't use same character in both slots
         e.currentTarget.classList.add('shake');
         setTimeout(() => e.currentTarget.classList.remove('shake'), 500);
@@ -655,15 +718,20 @@ function clearSlotDisplay(slotElement) {
  * Update mix button state
  */
 function updateMixButton() {
-    const canMix = state.mixSlots[0] && state.mixSlots[1];
-    elements.mixButton.disabled = !canMix;
+    const filledCount = state.mixSlots.filter(Boolean).length;
+    elements.mixButton.disabled = filledCount < 2;
+    if (filledCount >= 2) {
+        elements.mixButton.textContent = filledCount > 2 ? `MIX ${filledCount}!` : 'MIX!';
+    }
 }
 
 /**
  * Perform the mix!
  */
 async function performMix() {
-    if (!state.mixSlots[0] || !state.mixSlots[1]) return;
+    // Need at least 2 filled slots
+    const parents = state.mixSlots.filter(Boolean);
+    if (parents.length < 2) return;
 
     // Animate button
     elements.mixButton.classList.add('mixing');
@@ -675,28 +743,27 @@ async function performMix() {
 
     // Mix after animation
     setTimeout(async () => {
-        const char1 = state.mixSlots[0];
-        const char2 = state.mixSlots[1];
+        // Perform mix with all parents
+        let result = mixCharacters(parents, state.globalSeed);
 
-        // Perform mix
-        let result = mixCharacters(char1, char2, state.globalSeed);
-
-        // Check for special combo
-        const specialCombo = checkSpecialCombo(char1, char2);
-        if (specialCombo) {
-            result = applySpecialCombo(result, specialCombo);
+        // Check for special combo (2-parent combos only)
+        let specialCombo = null;
+        if (parents.length === 2) {
+            specialCombo = checkSpecialCombo(parents[0], parents[1]);
+            if (specialCombo) {
+                result = applySpecialCombo(result, specialCombo);
+            }
         }
 
-        // Try to generate AI fusion image
+        // Try to generate AI fusion image (first 2 parents for prompt)
         if (state.geminiConfigured) {
             elements.mixButton.textContent = 'GENERATING...';
-            // Show spinner in result area while generating
             elements.resultArea.classList.remove('hidden');
             elements.resultCharacter.innerHTML = '<div class="generating-spinner"></div><p style="color: var(--accent-gold); font-family: Bangers, cursive;">Generating fusion...</p>';
             elements.collectBtn.style.display = 'none';
             try {
                 const imageGenerator = getImageGenerator();
-                const fusionImage = await imageGenerator.getFusionImage(char1, char2);
+                const fusionImage = await imageGenerator.getFusionImage(parents[0], parents[1]);
                 if (fusionImage) {
                     result.generatedImage = fusionImage;
                 }
@@ -719,14 +786,16 @@ async function performMix() {
             playSuccess();
         }
 
-        // Reset slots
-        state.mixSlots = [null, null];
-        clearSlotDisplay(elements.slot1);
-        clearSlotDisplay(elements.slot2);
+        // Reset all slots
+        state.mixSlots = new Array(state.maxSlots).fill(null);
+        elements.mixingBowl.querySelectorAll('.mix-slot').forEach(slot => clearSlotDisplay(slot));
 
         elements.mixButton.classList.remove('mixing');
         elements.mixButton.textContent = 'MIX!';
         updateMixButton();
+
+        // Check progressive unlock
+        checkProgressiveUnlock();
 
     }, 1000);
 }
@@ -751,7 +820,7 @@ function showResult(char, isSpecial) {
             ${isSpecial ? '<div style="color: #39ff14; margin-top: 5px;">SPECIAL COMBO!</div>' : ''}
             ${char.generatedImage ? '<div style="color: #00f5ff; font-size: 0.7rem; margin-top: 3px;">AI Generated</div>' : ''}
             <div style="font-size: 0.7rem; color: #888; margin-top: 5px;">
-                ${char.parentNames[0]} + ${char.parentNames[1]}
+                ${char.parentNames.join(' + ')}
             </div>
         </div>
     `;
@@ -845,7 +914,7 @@ function newGamePlus() {
     // Reset with bonuses
     state.selectedStarters = [];
     state.collection = [];
-    state.mixSlots = [null, null];
+    state.mixSlots = new Array(state.maxSlots).fill(null);
     state.mixCount = 0;
     state.lastResult = null;
     // Keep some fame as bonus
