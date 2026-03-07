@@ -48,6 +48,23 @@ const state = {
 // Tap-to-place state (mobile support)
 let selectedForMix = null;
 
+/**
+ * Render character image with fallback chain (DRY)
+ * Priority: generatedImage > localImage > wikiImageUrl > emoji
+ */
+function renderCharacterImage(char, style = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;') {
+    if (char.generatedImage) {
+        return `<img src="${char.generatedImage}" alt="${char.name}" style="${style}">`;
+    }
+    if (char.localImage) {
+        return `<img src="${char.localImage}" alt="${char.name}" style="${style}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
+    }
+    if (char.wikiImageUrl) {
+        return `<img src="${char.wikiImageUrl}" alt="${char.name}" style="${style}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
+    }
+    return char.emoji;
+}
+
 // DOM Elements
 let elements = {};
 
@@ -275,29 +292,13 @@ function createCharacterCard(char, mode = 'collection') {
         card.addEventListener('dragstart', handleDragStart);
         card.addEventListener('dragend', handleDragEnd);
         // Tap-to-place for mobile
-        card.addEventListener('click', (e) => {
-            // Don't trigger tap if clicking lightbox image
-            if (e.target.closest('.character-image img')) return;
-            handleCardTap(char.id);
-        });
+        card.addEventListener('click', () => handleCardTap(char.id));
     } else if (mode === 'starter') {
         card.addEventListener('click', () => toggleStarterSelection(char.id));
     }
 
     const fame = calculateDisplayFame(char);
-
-    // Image priority: generated (AI fusion) > local portrait > wiki > emoji
-    let imageContent;
-    const imgStyle = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;';
-    if (char.generatedImage) {
-        imageContent = `<img src="${char.generatedImage}" alt="${char.name}" style="${imgStyle}">`;
-    } else if (char.localImage) {
-        imageContent = `<img src="${char.localImage}" alt="${char.name}" style="${imgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
-    } else if (char.wikiImageUrl) {
-        imageContent = `<img src="${char.wikiImageUrl}" alt="${char.name}" style="${imgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
-    } else {
-        imageContent = char.emoji;
-    }
+    const imageContent = renderCharacterImage(char);
 
     card.innerHTML = `
         <span class="tier-badge ${tierClass}">${char.tier}</span>
@@ -306,14 +307,24 @@ function createCharacterCard(char, mode = 'collection') {
         <div class="character-fame">${fame.toLocaleString()}</div>
     `;
 
-    // Lightbox: click image to view fullscreen
+    // Long-press to view fullscreen (KISS for mobile)
     const imgEl = card.querySelector('.character-image img');
     if (imgEl) {
-        imgEl.addEventListener('click', (e) => {
+        let pressTimer;
+        imgEl.style.cursor = 'zoom-in';
+        card.addEventListener('touchstart', (e) => {
+            pressTimer = setTimeout(() => {
+                e.preventDefault();
+                openLightbox(imgEl.src, char.name);
+            }, 500);
+        }, { passive: false });
+        card.addEventListener('touchend', () => clearTimeout(pressTimer));
+        card.addEventListener('touchmove', () => clearTimeout(pressTimer));
+        // Desktop: double-click for lightbox
+        imgEl.addEventListener('dblclick', (e) => {
             e.stopPropagation();
             openLightbox(imgEl.src, char.name);
         });
-        imgEl.style.cursor = 'zoom-in';
     }
 
     return card;
@@ -625,18 +636,7 @@ function handleDrop(e) {
  */
 function updateSlotDisplay(slotElement, char) {
     slotElement.classList.add('filled');
-    // Show image in slot if available
-    let slotImage;
-    const slotImgStyle = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;';
-    if (char.generatedImage) {
-        slotImage = `<img src="${char.generatedImage}" alt="${char.name}" style="${slotImgStyle}">`;
-    } else if (char.localImage) {
-        slotImage = `<img src="${char.localImage}" alt="${char.name}" style="${slotImgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
-    } else if (char.wikiImageUrl) {
-        slotImage = `<img src="${char.wikiImageUrl}" alt="${char.name}" style="${slotImgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
-    } else {
-        slotImage = char.emoji;
-    }
+    const slotImage = renderCharacterImage(char);
     slotElement.innerHTML = `
         <div class="character-image" style="width: 60px; height: 60px; font-size: 2rem;">${slotImage}</div>
         <div class="character-name" style="font-size: 0.7rem;">${char.name}</div>
@@ -737,16 +737,8 @@ async function performMix() {
 function showResult(char, isSpecial) {
     const fame = calculateDisplayFame(char);
 
-    // Image priority for result display
-    let imageContent;
     const resultImgStyle = 'width: 100px; height: 100px; border-radius: 10px; object-fit: cover;';
-    if (char.generatedImage) {
-        imageContent = `<img src="${char.generatedImage}" alt="${char.name}" style="${resultImgStyle}">`;
-    } else if (char.localImage) {
-        imageContent = `<img src="${char.localImage}" alt="${char.name}" style="${resultImgStyle}">`;
-    } else {
-        imageContent = char.emoji;
-    }
+    const imageContent = renderCharacterImage(char, resultImgStyle);
 
     elements.resultCharacter.innerHTML = `
         <div class="character-card ${char.tier.toLowerCase()}" style="width: auto; max-width: 200px; margin: 0 auto;">
@@ -755,9 +747,9 @@ function showResult(char, isSpecial) {
                 ${imageContent}
             </div>
             <div class="character-name">${char.name}</div>
-            <div class="character-fame">⭐ ${fame.toLocaleString()}</div>
-            ${isSpecial ? '<div style="color: #39ff14; margin-top: 5px;">✨ SPECIAL COMBO! ✨</div>' : ''}
-            ${char.generatedImage ? '<div style="color: #00f5ff; font-size: 0.7rem; margin-top: 3px;">🤖 AI Generated</div>' : ''}
+            <div class="character-fame">${fame.toLocaleString()}</div>
+            ${isSpecial ? '<div style="color: #39ff14; margin-top: 5px;">SPECIAL COMBO!</div>' : ''}
+            ${char.generatedImage ? '<div style="color: #00f5ff; font-size: 0.7rem; margin-top: 3px;">AI Generated</div>' : ''}
             <div style="font-size: 0.7rem; color: #888; margin-top: 5px;">
                 ${char.parentNames[0]} + ${char.parentNames[1]}
             </div>
@@ -765,6 +757,13 @@ function showResult(char, isSpecial) {
     `;
 
     elements.resultArea.classList.remove('hidden');
+
+    // Bug 2 fix: attach lightbox to result image
+    const resultImg = elements.resultCharacter.querySelector('.character-image img');
+    if (resultImg) {
+        resultImg.style.cursor = 'zoom-in';
+        resultImg.addEventListener('click', () => openLightbox(resultImg.src, char.name));
+    }
 
     // Particle burst on mix success
     const tierColors = {
@@ -822,16 +821,7 @@ function becomeFinalBoss(finalChar) {
     playFinalBoss();
 
     // Show boss screen
-    // Boss image priority
-    let bossImage;
-    const bossImgStyle = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;';
-    if (finalChar.generatedImage) {
-        bossImage = `<img src="${finalChar.generatedImage}" alt="${finalChar.name}" style="${bossImgStyle}">`;
-    } else if (finalChar.localImage) {
-        bossImage = `<img src="${finalChar.localImage}" alt="${finalChar.name}" style="${bossImgStyle}">`;
-    } else {
-        bossImage = finalChar.emoji;
-    }
+    const bossImage = renderCharacterImage(finalChar);
 
     elements.finalBossDisplay.innerHTML = `
         <div class="character-card mythic" style="width: auto; max-width: 300px; margin: 0 auto; padding: 20px;">

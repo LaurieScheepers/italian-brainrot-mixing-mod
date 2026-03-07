@@ -102,19 +102,10 @@ async function cacheImage(parent1Id, parent2Id, imageData, mimeType) {
 }
 
 /**
- * Convert base64 to blob URL for display
+ * Convert base64 to data URL for persistent display (survives page reload)
  */
-function base64ToBlobUrl(base64Data, mimeType) {
-    const byteCharacters = atob(base64Data);
-    const byteNumbers = new Array(byteCharacters.length);
-
-    for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: mimeType });
-    return URL.createObjectURL(blob);
+function base64ToDataUrl(base64Data, mimeType) {
+    return `data:${mimeType};base64,${base64Data}`;
 }
 
 /**
@@ -151,7 +142,7 @@ export class ImageGenerator {
         const cached = await getCachedImage(parent1.id, parent2.id);
         if (cached) {
             console.log('Using cached fusion image');
-            return base64ToBlobUrl(cached.imageData, cached.mimeType);
+            return base64ToDataUrl(cached.imageData, cached.mimeType);
         }
 
         // Try to generate with Gemini
@@ -175,7 +166,7 @@ export class ImageGenerator {
                 await cacheImage(parent1.id, parent2.id, result.data, result.mimeType);
 
                 // Return blob URL
-                return base64ToBlobUrl(result.data, result.mimeType);
+                return base64ToDataUrl(result.data, result.mimeType);
             }
         } catch (error) {
             console.error('Image generation failed:', error);
