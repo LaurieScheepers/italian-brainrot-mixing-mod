@@ -112,7 +112,7 @@ function addAudioControls() {
 function saveGameState() {
     const saveData = {
         collection: state.collection.map(c => ({
-            id: c.id, name: c.name, tier: c.tier, fameBase: c.fameBase,
+            id: c.id, name: c.name, nickname: c.nickname, tier: c.tier, fameBase: c.fameBase,
             emoji: c.emoji, species: c.species, origin: c.origin,
             abilities: c.abilities, parents: c.parents, parentNames: c.parentNames,
             generationDepth: c.generationDepth, isCombo: c.isCombo, seed: c.seed,
@@ -384,12 +384,26 @@ function createCharacterCard(char, mode = 'collection') {
     const fame = calculateDisplayFame(char);
     const imageContent = renderCharacterImage(char);
 
+    const displayName = char.nickname || char.name;
+    const originalName = char.nickname ? `<div class="original-name">${char.name}</div>` : '';
+
     card.innerHTML = `
         <span class="tier-badge ${tierClass}">${char.tier}</span>
         <div class="character-image">${imageContent}</div>
-        <div class="character-name">${char.name}</div>
+        <div class="character-name">${displayName}</div>${originalName}
         <div class="character-fame">${fame.toLocaleString()}</div>
     `;
+
+    // Nickname tap for mixed characters in collection
+    if (mode === 'collection' && char.isCombo) {
+        const nameEl = card.querySelector('.character-name');
+        nameEl.style.cursor = 'pointer';
+        nameEl.title = 'Tap to nickname';
+        nameEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            promptNickname(char);
+        });
+    }
 
     // Long-press to view fullscreen (KISS for mobile)
     const imgEl = card.querySelector('.character-image img');
@@ -412,6 +426,19 @@ function createCharacterCard(char, mode = 'collection') {
     }
 
     return card;
+}
+
+/**
+ * Prompt player to give a nickname to a mixed character
+ */
+function promptNickname(char) {
+    const current = char.nickname || char.name;
+    const nickname = prompt('Give a nickname:', current);
+    if (nickname !== null && nickname.trim()) {
+        char.nickname = nickname.trim();
+        saveGameState();
+        renderCollection();
+    }
 }
 
 /**
@@ -873,6 +900,80 @@ function updateMixButton() {
     if (filledCount >= 2) {
         elements.mixButton.textContent = filledCount > 2 ? `MIX ${filledCount}!` : 'MIX!';
     }
+    renderMixPreview();
+}
+
+/**
+ * Get a preview hint for the current mix slot contents.
+ * Returns tier range and special combo detection.
+ */
+function getMixPreview() {
+    const parents = state.mixSlots.filter(Boolean);
+    if (parents.length < 2) return null;
+
+    // Check for special combo (2 parents only)
+    let isSpecial = false;
+    if (parents.length === 2) {
+        isSpecial = checkSpecialCombo(parents[0], parents[1]) !== null;
+    }
+
+    // Predict tier range based on parents
+    const TIER_ORDER = ['COMMON', 'RARE', 'EPIC', 'LEGENDARY', 'MYTHIC'];
+    const parentTiers = parents.map(p => TIER_ORDER.indexOf(p.tier));
+    const maxTier = Math.max(...parentTiers);
+    const baseTier = TIER_ORDER[maxTier];
+    const upgradeTier = maxTier < 4 ? TIER_ORDER[maxTier + 1] : null;
+
+    // Average fame hint
+    const avgFame = Math.floor(parents.reduce((s, p) => s + p.fameBase, 0) / parents.length);
+
+    return { baseTier, upgradeTier, avgFame, isSpecial, parentCount: parents.length };
+}
+
+/**
+ * Render (or hide) the mix preview hint above the MIX button.
+ */
+function renderMixPreview() {
+    let preview = document.getElementById('mix-preview');
+    if (!preview) {
+        preview = document.createElement('div');
+        preview.id = 'mix-preview';
+        preview.className = 'mix-preview';
+        // Insert before the mix button
+        elements.mixButton.parentNode.insertBefore(preview, elements.mixButton);
+    }
+
+    const info = getMixPreview();
+    if (!info) {
+        preview.innerHTML = '';
+        preview.style.display = 'none';
+        return;
+    }
+
+    preview.style.display = 'block';
+
+    const tierColors = {
+        COMMON: '#888',
+        RARE: '#3498db',
+        EPIC: '#9b59b6',
+        LEGENDARY: '#f39c12',
+        MYTHIC: '#ff6b9d'
+    };
+
+    const tierColor = tierColors[info.baseTier] || '#888';
+    const upgradeHint = info.upgradeTier
+        ? `<span class="preview-upgrade">or ${info.upgradeTier}!</span>`
+        : '';
+    const specialHint = info.isSpecial
+        ? '<span class="preview-special">SPECIAL COMBO!</span>'
+        : '';
+
+    preview.innerHTML = `
+        <span class="preview-tier" style="color: ${tierColor}">${info.baseTier}</span>
+        ${upgradeHint}
+        ${specialHint}
+        <span class="preview-fame">~${info.avgFame} base fame</span>
+    `;
 }
 
 /**
