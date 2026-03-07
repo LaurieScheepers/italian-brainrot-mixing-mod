@@ -112,7 +112,7 @@ function addAudioControls() {
 function saveGameState() {
     const saveData = {
         collection: state.collection.map(c => ({
-            id: c.id, name: c.name, tier: c.tier, fameBase: c.fameBase,
+            id: c.id, name: c.name, nickname: c.nickname, tier: c.tier, fameBase: c.fameBase,
             emoji: c.emoji, species: c.species, origin: c.origin,
             abilities: c.abilities, parents: c.parents, parentNames: c.parentNames,
             generationDepth: c.generationDepth, isCombo: c.isCombo, seed: c.seed,
@@ -384,12 +384,26 @@ function createCharacterCard(char, mode = 'collection') {
     const fame = calculateDisplayFame(char);
     const imageContent = renderCharacterImage(char);
 
+    const displayName = char.nickname || char.name;
+    const originalName = char.nickname ? `<div class="original-name">${char.name}</div>` : '';
+
     card.innerHTML = `
         <span class="tier-badge ${tierClass}">${char.tier}</span>
         <div class="character-image">${imageContent}</div>
-        <div class="character-name">${char.name}</div>
+        <div class="character-name">${displayName}</div>${originalName}
         <div class="character-fame">${fame.toLocaleString()}</div>
     `;
+
+    // Nickname tap for mixed characters in collection
+    if (mode === 'collection' && char.isCombo) {
+        const nameEl = card.querySelector('.character-name');
+        nameEl.style.cursor = 'pointer';
+        nameEl.title = 'Tap to nickname';
+        nameEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            promptNickname(char);
+        });
+    }
 
     // Long-press to view fullscreen (KISS for mobile)
     const imgEl = card.querySelector('.character-image img');
@@ -412,6 +426,19 @@ function createCharacterCard(char, mode = 'collection') {
     }
 
     return card;
+}
+
+/**
+ * Prompt player to give a nickname to a mixed character
+ */
+function promptNickname(char) {
+    const current = char.nickname || char.name;
+    const nickname = prompt('Give a nickname:', current);
+    if (nickname !== null && nickname.trim()) {
+        char.nickname = nickname.trim();
+        saveGameState();
+        renderCollection();
+    }
 }
 
 /**
