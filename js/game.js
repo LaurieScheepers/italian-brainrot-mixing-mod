@@ -3,7 +3,7 @@
  * by Luka & Pappa
  */
 
-import { getAllBaseCharacters, getTierInfo, calculateDisplayFame } from './characters.js';
+import { getAllBaseCharacters, getTierInfo, calculateDisplayFame, loadWikiCharacters } from './characters.js';
 import { mixCharacters, checkSpecialCombo, applySpecialCombo, hashString } from './mixing.js';
 import { MersenneTwister } from './mersenne.js';
 import { getGeminiAPI, saveApiKey, initGeminiFromStorage } from './gemini-api.js';
@@ -82,7 +82,13 @@ let elements = {};
 /**
  * Initialize the game
  */
-function init() {
+async function init() {
+    // Load wiki-mined characters before anything else
+    const wikiCount = await loadWikiCharacters();
+    if (wikiCount > 0) {
+        console.log(`Loaded ${wikiCount} wiki characters (${getAllBaseCharacters().length} total)`);
+    }
+
     cacheElements();
     setupEventListeners();
     parseShareURL();
@@ -521,6 +527,22 @@ function openLightbox(imageSrc, caption) {
     elements.lightboxImage.src = imageSrc;
     elements.lightboxImage.alt = caption;
     elements.lightboxCaption.textContent = caption;
+
+    // Add collect shortcut button if viewing a mix result
+    const existingBtn = elements.lightbox.querySelector('.lightbox-collect-btn');
+    if (existingBtn) existingBtn.remove();
+
+    if (state.lastResult) {
+        const collectBtn = document.createElement('button');
+        collectBtn.className = 'lightbox-collect-btn';
+        collectBtn.textContent = 'COLLECT!';
+        collectBtn.addEventListener('click', () => {
+            closeLightbox();
+            collectResult();
+        });
+        elements.lightbox.querySelector('.lightbox-content').appendChild(collectBtn);
+    }
+
     elements.lightbox.classList.remove('hidden');
 }
 
@@ -531,6 +553,8 @@ function closeLightbox() {
     if (!elements.lightbox) return;
     elements.lightbox.classList.add('hidden');
     elements.lightboxImage.src = '';
+    const collectBtn = elements.lightbox.querySelector('.lightbox-collect-btn');
+    if (collectBtn) collectBtn.remove();
 }
 
 /**
@@ -797,6 +821,11 @@ function renderCollection() {
     elements.collectionGrid.innerHTML = '';
 
     const sorted = getSortedCollection();
+
+    if (sorted.length === 0) {
+        elements.collectionGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); font-style: italic; padding: 20px;">Drag characters to the bowl below and MIX!</p>';
+        return;
+    }
 
     sorted.forEach((char, i) => {
         const card = createCharacterCard(char, 'collection');

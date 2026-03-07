@@ -58,7 +58,8 @@ italian-brainrot-mixing-mod/
 ├── tests/
 │   └── test-mixing.js      # 39 Goodhart-protected mixing algorithm tests
 ├── scripts/
-│   └── generate-portraits.mjs  # Gemini portrait generation (40 characters)
+│   ├── generate-portraits.mjs  # Gemini portrait generation (40 characters)
+│   └── mine-wiki.mjs           # Wiki character mining (60 new characters)
 ├── assets/
 │   ├── images/             # Character portraits (generated via scripts/)
 │   │   └── generated/      # AI-generated fusion images (gitignored)
@@ -68,7 +69,7 @@ italian-brainrot-mixing-mod/
 │   │   └── sfx/            # Sound effects
 │   └── ui/                 # UI elements
 └── data/
-    └── characters.json     # Extended character database (TODO)
+    └── characters.json     # 60 wiki-mined characters (auto-generated)
 ```
 
 ## Game Mechanics
@@ -124,9 +125,9 @@ npm test  # Run 39 Goodhart-protected mixing algorithm tests
 
 Tests cover: determinism, order independence, seed sensitivity, name quality, tier validity, fame calculation, generation depth, multi-parent mixing (3 and 4), special combos, legacy API compatibility, abilities, parent count bonus.
 
-## Characters (40 Total)
+## Characters (100 Total: 40 base + 60 wiki-mined)
 
-### Tier Distribution
+### Base Characters Tier Distribution (40)
 
 | Tier | Count | Fame Range |
 |------|-------|------------|
@@ -135,6 +136,16 @@ Tests cover: determinism, order independence, seed sensitivity, name quality, ti
 | EPIC | 10 | 600-750 |
 | RARE | 8 | 450-530 |
 | COMMON | 10 | 270-400 |
+
+### Wiki-Mined Characters (60, from data/characters.json)
+
+| Tier | Count | Fame Range |
+|------|-------|------------|
+| MYTHIC | 3 | 950-1050 |
+| LEGENDARY | 9 | 820-900 |
+| EPIC | 15 | 600-750 |
+| RARE | 15 | 450-530 |
+| COMMON | 18 | 270-400 |
 
 ### Original 10 (Phase 1)
 
@@ -218,7 +229,8 @@ Predefined recipes with bonus fame:
 - [x] Gemini-generated character portraits (scripts/generate-portraits.mjs)
 - [x] Local image support with fallback chain (generated > local > wiki > emoji)
 - [x] Fullscreen image lightbox
-- [ ] Wiki mining script for 100+ characters
+- [x] Wiki mining script for 100 characters (scripts/mine-wiki.mjs)
+- [x] Runtime wiki character loading (async merge in game.js)
 - [ ] Daily challenges rotation
 
 ### Phase 5: Social
@@ -240,8 +252,10 @@ Predefined recipes with bonus fame:
 - [x] Collection persistence (localStorage + IndexedDB)
 - [x] Automated tests (39 Goodhart-protected)
 - [x] CI pipeline (GitHub Actions)
-- [ ] Achievement system with badges
-- [ ] Combo Discovery Book
+- [x] Achievement system with badges
+- [x] Combo Discovery Book
+- [x] Fix: result area z-index overlay (always visible above mixing bowl)
+- [x] Collect button shortcut on lightbox view
 - [ ] PWA + offline support
 
 ## Social Features
@@ -375,6 +389,28 @@ node scripts/generate-portraits.mjs
 - Idempotent: skips existing images
 - Fallback model on 404
 - Prompts reference Italian Brainrot meme universe
+
+### Wiki Character Mining
+
+Mine 60 characters from the Italian Brainrot wiki:
+
+```bash
+# Dry run (preview without writing)
+node scripts/mine-wiki.mjs --dry-run
+
+# Fast mode (fewer API calls)
+node scripts/mine-wiki.mjs --fast
+
+# Full run
+node scripts/mine-wiki.mjs
+```
+
+- Fetches from `italianbrainrot.miraheze.org` via MediaWiki API
+- Auto-assigns tiers by page content length (popularity proxy)
+- NSFW and non-character page filtering
+- Rate limited (1.5s between requests)
+- Output: `data/characters.json`
+- Loaded at runtime via `loadWikiCharacters()` in characters.js
 
 ### Image Priority Chain
 

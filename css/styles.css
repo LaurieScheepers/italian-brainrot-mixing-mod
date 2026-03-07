@@ -446,15 +446,24 @@ body::before {
     75% { transform: scale(1.1) rotate(5deg); }
 }
 
-/* Result Area */
+/* Result Area - Fixed overlay above mixing bowl */
 .result-area {
     text-align: center;
-    padding: 30px;
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(0, 245, 255, 0.2));
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(45, 27, 78, 0.97), rgba(26, 10, 46, 0.97));
+    border: 3px solid var(--accent-gold);
     border-radius: 20px;
-    margin: 20px auto;
-    max-width: 400px;
+    position: fixed;
+    bottom: 180px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 380px;
+    z-index: 600;
     animation: resultAppear 0.5s ease-out;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), 0 -10px 30px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .result-area.hidden {
@@ -503,6 +512,26 @@ body::before {
 }
 
 .collect-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px var(--accent-green);
+}
+
+/* Lightbox collect shortcut button */
+.lightbox-collect-btn {
+    font-family: 'Bangers', cursive;
+    font-size: 1.3rem;
+    padding: 10px 36px;
+    background: var(--accent-green);
+    border: none;
+    border-radius: 30px;
+    color: #1a0a2e;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: all 0.3s ease;
+    animation: resultAppear 0.3s ease-out;
+}
+
+.lightbox-collect-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 0 20px var(--accent-green);
 }
@@ -666,6 +695,11 @@ body::before {
 
     .collection-area {
         padding-bottom: 180px; /* Smaller bowl on mobile */
+    }
+
+    .result-area {
+        bottom: 160px;
+        padding: 15px;
     }
 }
 
