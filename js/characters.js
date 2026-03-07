@@ -627,6 +627,30 @@ export const BASE_CHARACTERS = [
 ];
 
 /**
+ * Load mined wiki characters and merge into BASE_CHARACTERS
+ * Call once during game init. Safe to call multiple times (idempotent).
+ */
+export async function loadWikiCharacters() {
+    try {
+        const response = await fetch('./data/characters.json');
+        if (!response.ok) return 0;
+        const data = await response.json();
+        const wikiChars = data.characters || [];
+        let added = 0;
+        for (const char of wikiChars) {
+            if (!BASE_CHARACTERS.find(c => c.id === char.id)) {
+                BASE_CHARACTERS.push(char);
+                added++;
+            }
+        }
+        return added;
+    } catch (e) {
+        // Offline or file missing - continue with base 40
+        return 0;
+    }
+}
+
+/**
  * Get all base characters
  */
 export function getAllBaseCharacters() {

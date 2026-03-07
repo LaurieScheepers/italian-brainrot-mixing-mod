@@ -1,0 +1,1207 @@
+{
+  "minedAt": "2026-03-07T11:35:53.074Z",
+  "source": "italianbrainrot.miraheze.org",
+  "count": 60,
+  "characters": [
+    {
+      "id": "santo-sahur",
+      "name": "Santo Sahur",
+      "origin": "Indonesian",
+      "species": "Bible Book, Unicycle",
+      "fameBase": 1018,
+      "tier": "MYTHIC",
+      "emoji": "🐜",
+      "description": "Not To Be Confused With Tictac Tictac Sahur and Bible Bible Bible",
+      "abilities": [
+        "Santo Strike",
+        "Bible Power",
+        "Prosciutto Punch"
+      ],
+      "audio": {
+        "name": "santo-sahur",
+        "catchphrase": "Santo!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/2/20/Santosahur.jpg/300px-Santosahur.jpg"
+    },
+    {
+      "id": "vini-tung-tung-tung-brasiliano",
+      "name": "Vini Tung Tung Tung Brasiliano",
+      "origin": "Italian",
+      "species": "Human",
+      "fameBase": 1017,
+      "tier": "MYTHIC",
+      "emoji": "🔮",
+      "description": "Overview • Relationships • Abilities • Variants • Gallery • History  • Reception • Trivia • Templates • Lore • In battle • Life stages • Element",
+      "abilities": [
+        "Vini Strike",
+        "Human Power",
+        "Brainrot Beam"
+      ],
+      "audio": {
+        "name": "vini-tung-tung-tung-brasiliano",
+        "catchphrase": "Vini!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/4/49/Vini_Tung_Tung_Tung_Braziliano.jpg/300px-Vini_Tung_Tung_Tung_Braziliano.jpg"
+    },
+    {
+      "id": "roletini-azarini",
+      "name": "Roletini Azarini",
+      "origin": "Italian",
+      "species": "Roulette",
+      "fameBase": 1001,
+      "tier": "MYTHIC",
+      "emoji": "🔮",
+      "description": "A mysterious Roulette creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Roletini Strike",
+        "Roulette Power",
+        "Espresso Rush"
+      ],
+      "audio": {
+        "name": "roletini-azarini",
+        "catchphrase": "Roletini!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/5/52/Noo%21.png/300px-Noo%21.png"
+    },
+    {
+      "id": "elevator-elevator-elevator-sahur",
+      "name": "ELEVATOR ELEVATOR ELEVATOR Sahur",
+      "origin": "Italian",
+      "species": "Elevator",
+      "fameBase": 835,
+      "tier": "LEGENDARY",
+      "emoji": "🔮",
+      "description": "A mysterious Elevator creature from the Italian Brainrot universe.",
+      "abilities": [
+        "ELEVATOR Strike",
+        "Elevator Power",
+        "Tiramisu Trap"
+      ],
+      "audio": {
+        "name": "elevator-elevator-elevator-sahur",
+        "catchphrase": "ELEVATOR!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/a/af/ElevatorSahur.png/300px-ElevatorSahur.png"
+    },
+    {
+      "id": "bola-disko-tertawa",
+      "name": "Bola Disko Tertawa",
+      "origin": "Indonesian",
+      "species": "Monkey that holds a laughing disco ball and a phone",
+      "fameBase": 866,
+      "tier": "LEGENDARY",
+      "emoji": "🐒",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Bola Strike",
+        "Monkey Power",
+        "Limoncello Splash"
+      ],
+      "audio": {
+        "name": "bola-disko-tertawa",
+        "catchphrase": "Bola!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/7/7e/Bola_Disko_Tertawa.png/300px-Bola_Disko_Tertawa.png"
+    },
+    {
+      "id": "king-king-king-sahur",
+      "name": "King King King Sahur",
+      "origin": "Indonesian",
+      "species": "Tungsten",
+      "fameBase": 820,
+      "tier": "LEGENDARY",
+      "emoji": "👑",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "King Strike",
+        "Tungsten Power",
+        "Colosseum Slam"
+      ],
+      "audio": {
+        "name": "king-king-king-sahur",
+        "catchphrase": "King!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/5/58/King_King_King_Sahur.png/300px-King_King_King_Sahur.png"
+    },
+    {
+      "id": "perrito-enrique-naceiles",
+      "name": "Perrito Enrique Naceiles",
+      "origin": "English",
+      "species": "Homo sapien (Human)Cynictis penicillata (Yellow mongoose)Canis familiaris (Dog)",
+      "fameBase": 877,
+      "tier": "LEGENDARY",
+      "emoji": "🐕",
+      "description": "A mysterious Homo sapien (Human)Cynictis penicillata (Yellow mongoose)Canis familiaris (Dog) creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Perrito Strike",
+        "Homo Power",
+        "Brainrot Beam"
+      ],
+      "audio": {
+        "name": "perrito-enrique-naceiles",
+        "catchphrase": "Perrito!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/2/2c/Purrito.png/300px-Purrito.png"
+    },
+    {
+      "id": "ti-ti-ti-ti-ti-sahur-garam-dan-madung",
+      "name": "Ti Ti Ti Ti Ti Sahur Garam Dan Madung",
+      "origin": "Italian",
+      "species": "Wood / Robot",
+      "fameBase": 871,
+      "tier": "LEGENDARY",
+      "emoji": "🤖",
+      "description": ".mw-parser-output .ombox{margin:4px 0;border-collapse:collapse;border:1px solid #a2a9b1;background-color:var(--background-color-neutral-subtle,#f8f9fa);box-sizing:border-box;color:var(--color-base,...",
+      "abilities": [
+        "Sahur Strike",
+        "Wood Power",
+        "Spaghetti Whip"
+      ],
+      "audio": {
+        "name": "ti-ti-ti-ti-ti-sahur-garam-dan-madung",
+        "catchphrase": "Ti!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/3/34/Image.png/300px-Image.png"
+    },
+    {
+      "id": "la-house-house-drebebouse",
+      "name": "La House House Drebebouse",
+      "origin": "Polish",
+      "species": "Unknown",
+      "fameBase": 875,
+      "tier": "LEGENDARY",
+      "emoji": "🔮",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "House Strike",
+        "Unknown Power",
+        "Italian Rage"
+      ],
+      "audio": {
+        "name": "la-house-house-drebebouse",
+        "catchphrase": "La!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/7/79/1767545045935.png/300px-1767545045935.png"
+    },
+    {
+      "id": "il-mastodontico-telepiedone-planetario",
+      "name": "Il Mastodontico Telepiedone Planetario",
+      "origin": "Italian",
+      "species": "TV, space",
+      "fameBase": 835,
+      "tier": "LEGENDARY",
+      "emoji": "✈️",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Mastodontico Strike",
+        "Vespa Chase",
+        "Colosseum Slam"
+      ],
+      "audio": {
+        "name": "il-mastodontico-telepiedone-planetario",
+        "catchphrase": "Il!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/0/05/Il_Mastodontico_Telepiedone_Planetario.png/300px-Il_Mastodontico_Telepiedone_Planetario.png"
+    },
+    {
+      "id": "dul-dul-dul-dul-dul-gundul-kuntul",
+      "name": "Dul Dul Dul Dul Dul Gundul Kuntul",
+      "origin": "Indonesian",
+      "species": "Monkey",
+      "fameBase": 884,
+      "tier": "LEGENDARY",
+      "emoji": "🐒",
+      "description": "A mysterious Monkey creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Dul Strike",
+        "Monkey Power",
+        "Bruschetta Bash"
+      ],
+      "audio": {
+        "name": "dul-dul-dul-dul-dul-gundul-kuntul",
+        "catchphrase": "Dul!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/f/fa/Dulduldulduldulgundulkuntul.jpg/300px-Dulduldulduldulgundulkuntul.jpg"
+    },
+    {
+      "id": "bombombini-gusini",
+      "name": "Bombombini Gusini",
+      "origin": "Italian",
+      "species": "Bomber-goose hybrid",
+      "fameBase": 841,
+      "tier": "LEGENDARY",
+      "emoji": "💣",
+      "description": "A mysterious Bomber-goose hybrid creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Bombombini Strike",
+        "Bomber-goose Power",
+        "Italian Rage"
+      ],
+      "audio": {
+        "name": "bombombini-gusini",
+        "catchphrase": "Bombombini!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/8/8a/Bombombini_gusini_original.jpg/300px-Bombombini_gusini_original.jpg"
+    },
+    {
+      "id": "alaram-alaram-alaram-sahur",
+      "name": "Alaram Alaram Alaram Sahur",
+      "origin": "Indonesian",
+      "species": "Phone-spider hybrid",
+      "fameBase": 734,
+      "tier": "EPIC",
+      "emoji": "🕷️",
+      "description": "A mysterious Phone-spider hybrid creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Alaram Strike",
+        "Phone-spider Power",
+        "Risotto Rain"
+      ],
+      "audio": {
+        "name": "alaram-alaram-alaram-sahur",
+        "catchphrase": "Alaram!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/7/7a/5139.jpg/300px-5139.jpg"
+    },
+    {
+      "id": "tripod-cat",
+      "name": "Tripod Cat",
+      "origin": "English",
+      "species": "Tripod, Cat",
+      "fameBase": 636,
+      "tier": "EPIC",
+      "emoji": "🐱",
+      "description": "Overview • Relationships • Abilities • Variants • Gallery • History  • Reception",
+      "abilities": [
+        "Tripod Strike",
+        "Tripod Power",
+        "Parmesan Shield"
+      ],
+      "audio": {
+        "name": "tripod-cat",
+        "catchphrase": "Tripod!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/6/6d/Tripod_Cat.jpeg/300px-Tripod_Cat.jpeg"
+    },
+    {
+      "id": "canpul-pul-pul",
+      "name": "Canpul Pul Pul",
+      "origin": "Italian",
+      "species": "Capybara",
+      "fameBase": 663,
+      "tier": "EPIC",
+      "emoji": "🔮",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Canpul Strike",
+        "Capybara Power",
+        "Spaghetti Whip"
+      ],
+      "audio": {
+        "name": "canpul-pul-pul",
+        "catchphrase": "Canpul!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/f/fa/Capul_Pul_pul.jpeg/300px-Capul_Pul_pul.jpeg"
+    },
+    {
+      "id": "stop-stop-stop-sahur",
+      "name": "Stop Stop Stop Sahur",
+      "origin": "Italian",
+      "species": "Stop Sign",
+      "fameBase": 640,
+      "tier": "EPIC",
+      "emoji": "🔮",
+      "description": "Overview • Relationships • Abilities • Variants • Gallery • History",
+      "abilities": [
+        "Stop Strike",
+        "Stop Power",
+        "Venice Flood"
+      ],
+      "audio": {
+        "name": "stop-stop-stop-sahur",
+        "catchphrase": "Stop!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/7/73/IMG_3316.jpeg/300px-IMG_3316.jpeg"
+    },
+    {
+      "id": "fanfinfunfonfonfinferenfonfancy",
+      "name": "Fanfinfunfonfonfinferenfonfancy",
+      "origin": "Indonesian",
+      "species": "Restaurant Chair",
+      "fameBase": 723,
+      "tier": "EPIC",
+      "emoji": "🐜",
+      "description": "Overview • Relationships • Abilities • Variants • Gallery • History  • Reception",
+      "abilities": [
+        "Fanfinfunfonfonfinferenfonfancy Strike",
+        "Restaurant Power",
+        "Limoncello Splash"
+      ],
+      "audio": {
+        "name": "fanfinfunfonfonfinferenfonfancy",
+        "catchphrase": "Fanfinfunfonfonfinferenfonfancy!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/1/11/Fanfinfunfonfonfinferenfonfancy.png/300px-Fanfinfunfonfonfinferenfonfancy.png"
+    },
+    {
+      "id": "trulimero-trulichina",
+      "name": "Trulimero Trulichina",
+      "origin": "Italian",
+      "species": "Cat / Fish / Human Legs (Iconic)Cat / Goldfish (V2)Human / Snail / Dolphin (OG)",
+      "fameBase": 643,
+      "tier": "EPIC",
+      "emoji": "🐱",
+      "description": "Overview • Relationships • Abilities • Variants • Gallery • History.mw-parser-output .ombox{margin:4px 0;border-collapse:collapse;border:1px solid #a2a9b1;background-color:var(--background-color-ne...",
+      "abilities": [
+        "Trulimero Strike",
+        "Cat Power",
+        "Gondola Charge"
+      ],
+      "audio": {
+        "name": "trulimero-trulichina",
+        "catchphrase": "Trulimero!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/c/cf/Trulimerotrulichina.webp/300px-Trulimerotrulichina.webp.png"
+    },
+    {
+      "id": "triki-kiki-triki-sahur",
+      "name": "Triki Kiki Triki Sahur",
+      "origin": "Italian",
+      "species": "Bearded dragon",
+      "fameBase": 649,
+      "tier": "EPIC",
+      "emoji": "🐻",
+      "description": "A mysterious Bearded dragon creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Triki Strike",
+        "Bearded Power",
+        "Italian Rage"
+      ],
+      "audio": {
+        "name": "triki-kiki-triki-sahur",
+        "catchphrase": "Triki!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/8/86/Triki_Kiki_Triki_Sahur.png/300px-Triki_Kiki_Triki_Sahur.png"
+    },
+    {
+      "id": "calcuclatratrat",
+      "name": "Calcuclatratrat",
+      "origin": "Italian",
+      "species": "Calculator",
+      "fameBase": 740,
+      "tier": "EPIC",
+      "emoji": "🔮",
+      "description": "A mysterious Calculator creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Calcuclatratrat Strike",
+        "Calculator Power",
+        "Vespa Chase"
+      ],
+      "audio": {
+        "name": "calcuclatratrat",
+        "catchphrase": "Calcuclatratrat!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/2/21/Ed9322dd-dfe8-41b5-aaaa-92662ed9eb66.webp/300px-Ed9322dd-dfe8-41b5-aaaa-92662ed9eb66.webp.png"
+    },
+    {
+      "id": "skidino-dan-pumpzito",
+      "name": "Skidino dan Pumpzito",
+      "origin": "Italian",
+      "species": "Skeleton and Pumpkin humanoids",
+      "fameBase": 734,
+      "tier": "EPIC",
+      "emoji": "🔮",
+      "description": "Skidino dan Pumpzito are supernatural creatures that often appear during the month of Halloween. They used to be ordinary humans, but because of their great love for Halloween, they were cursed and...",
+      "abilities": [
+        "Skidino Strike",
+        "Skeleton Power",
+        "Brainrot Beam"
+      ],
+      "audio": {
+        "name": "skidino-dan-pumpzito",
+        "catchphrase": "Skidino!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/8/87/Skidino_and_pumpzito.jpeg/300px-Skidino_and_pumpzito.jpeg"
+    },
+    {
+      "id": "triki-traka-telas",
+      "name": "Triki Traka Telas",
+      "origin": "Italian",
+      "species": "Rhino Cactus Crocs",
+      "fameBase": 734,
+      "tier": "EPIC",
+      "emoji": "🔮",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Triki Strike",
+        "Rhino Power",
+        "Pizza Toss"
+      ],
+      "audio": {
+        "name": "triki-traka-telas",
+        "catchphrase": "Triki!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/e/e8/TrikiTrakaTelas.jpeg/300px-TrikiTrakaTelas.jpeg"
+    },
+    {
+      "id": "ame-ame-ame-sahur",
+      "name": "Ame Ame Ame Sahur",
+      "origin": "Italian",
+      "species": "Purple Amethyst",
+      "fameBase": 625,
+      "tier": "EPIC",
+      "emoji": "🔮",
+      "description": "A mysterious Purple Amethyst creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Ame Strike",
+        "Purple Power",
+        "Brainrot Beam"
+      ],
+      "audio": {
+        "name": "ame-ame-ame-sahur",
+        "catchphrase": "Ame!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/c/ca/Cristal_de_ametista_em_caverna_iluminada.png/300px-Cristal_de_ametista_em_caverna_iluminada.png"
+    },
+    {
+      "id": "ada-nona-ambon",
+      "name": "Ada Nona Ambon",
+      "origin": "Indonesian",
+      "species": "Ballerina/Crocodile(V1)Ballerina / Monkey (V2)Ballerina/ Horse (V3)",
+      "fameBase": 625,
+      "tier": "EPIC",
+      "emoji": "🐊",
+      "description": "This page was saved by AlbertSamosa!.mw-parser-output .ombox{margin:4px 0;border-collapse:collapse;border:1px solid #a2a9b1;background-color:var(--background-color-neutral-subtle,#f8f9fa);box-sizin...",
+      "abilities": [
+        "Ada Strike",
+        "Ballerina Power",
+        "Focaccia Flip"
+      ],
+      "audio": {
+        "name": "ada-nona-ambon",
+        "catchphrase": "Ada!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/a/a8/124.png/300px-124.png"
+    },
+    {
+      "id": "wikini-endini-depressi",
+      "name": "Wikini Endini Depressi",
+      "origin": "English",
+      "species": "Unknown",
+      "fameBase": 717,
+      "tier": "EPIC",
+      "emoji": "🔮",
+      "description": "A mysterious Unknown creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Wikini Strike",
+        "Unknown Power",
+        "Opera Scream"
+      ],
+      "audio": {
+        "name": "wikini-endini-depressi",
+        "catchphrase": "Wikini!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/0/0b/Depressi_Nihilism.png/300px-Depressi_Nihilism.png"
+    },
+    {
+      "id": "il-colossale-aerovisione-cosmomaniaco",
+      "name": "Il Colossale Aerovisione Cosmomaniaco",
+      "origin": "Italian",
+      "species": "Television, Wooden Plane",
+      "fameBase": 601,
+      "tier": "EPIC",
+      "emoji": "✈️",
+      "description": "A mysterious Television, Wooden Plane creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Colossale Strike",
+        "Television Power",
+        "Bruschetta Bash"
+      ],
+      "audio": {
+        "name": "il-colossale-aerovisione-cosmomaniaco",
+        "catchphrase": "Il!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/4/4e/Il_Colossale_Aerovisione_Cosmomaniaco.png/300px-Il_Colossale_Aerovisione_Cosmomaniaco.png"
+    },
+    {
+      "id": "alamak-senin-sekolah",
+      "name": "Alamak Senin Sekolah",
+      "origin": "Indonesian",
+      "species": "Wooden Number (14)",
+      "fameBase": 630,
+      "tier": "EPIC",
+      "emoji": "🔮",
+      "description": "A mysterious Wooden Number (14) creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Alamak Strike",
+        "Wooden Power",
+        "Opera Scream"
+      ],
+      "audio": {
+        "name": "alamak-senin-sekolah",
+        "catchphrase": "Alamak!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/0/03/Conheca_a_anomalia_14_Senin_Sekolah%21.png/300px-Conheca_a_anomalia_14_Senin_Sekolah%21.png"
+    },
+    {
+      "id": "ta-ta-ta-sahur",
+      "name": "Ta Ta Ta Sahur",
+      "origin": "Indonesian",
+      "species": "Kettle",
+      "fameBase": 501,
+      "tier": "RARE",
+      "emoji": "🔮",
+      "description": ".mw-parser-output .ombox{margin:4px 0;border-collapse:collapse;border:1px solid #a2a9b1;background-color:var(--background-color-neutral-subtle,#f8f9fa);box-sizing:border-box;color:var(--color-base,...",
+      "abilities": [
+        "Sahur Strike",
+        "Kettle Power",
+        "Limoncello Splash"
+      ],
+      "audio": {
+        "name": "ta-ta-ta-sahur",
+        "catchphrase": "Ta!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/1/19/Ta_ta_ta_ta_ta_ta_ta_ta_sahur.png/300px-Ta_ta_ta_ta_ta_ta_ta_ta_sahur.png"
+    },
+    {
+      "id": "tob-tobi-tob-tob-tobi-tob",
+      "name": "Tob Tobi Tob Tob Tobi Tob",
+      "origin": "Italian",
+      "species": "Camel, cactus",
+      "fameBase": 500,
+      "tier": "RARE",
+      "emoji": "🔮",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Tob Strike",
+        "Camel Power",
+        "Meme Blast"
+      ],
+      "audio": {
+        "name": "tob-tobi-tob-tob-tobi-tob",
+        "catchphrase": "Tob!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/7/79/Toptobitob.webp/300px-Toptobitob.webp.png"
+    },
+    {
+      "id": "tanggal-9-april-adalah-besok",
+      "name": "Tanggal 9 April Adalah Besok",
+      "origin": "Italian",
+      "species": "Calendar",
+      "fameBase": 465,
+      "tier": "RARE",
+      "emoji": "🔮",
+      "description": "A mysterious Calendar creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Tanggal Strike",
+        "Calendar Power",
+        "Gondola Charge"
+      ],
+      "audio": {
+        "name": "tanggal-9-april-adalah-besok",
+        "catchphrase": "Tanggal!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/1/1a/78271e17-9598-4a40-b715-2a30dfc539c9.webp/300px-78271e17-9598-4a40-b715-2a30dfc539c9.webp.png"
+    },
+    {
+      "id": "kecoa-kecoa-kecoa-kecoa-kecoa-kuda-sahur",
+      "name": "Kecoa Kecoa Kecoa Kecoa Kecoa Kuda Sahur",
+      "origin": "Indonesian",
+      "species": "Cockroach",
+      "fameBase": 500,
+      "tier": "RARE",
+      "emoji": "🔮",
+      "description": "A mysterious Cockroach creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Kecoa Strike",
+        "Cockroach Power",
+        "Pizza Toss"
+      ],
+      "audio": {
+        "name": "kecoa-kecoa-kecoa-kecoa-kecoa-kuda-sahur",
+        "catchphrase": "Kecoa!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/a/a3/Kecoa_kuda_sahur_.jpg/300px-Kecoa_kuda_sahur_.jpg"
+    },
+    {
+      "id": "penculikan-karet-dan-karet-pencuri",
+      "name": "Penculikan karet dan karet pencuri",
+      "origin": "Italian",
+      "species": "Glue",
+      "fameBase": 498,
+      "tier": "RARE",
+      "emoji": "🔮",
+      "description": "This brainrot is part of the School utensils!",
+      "abilities": [
+        "Penculikan Strike",
+        "Glue Power",
+        "Venice Flood"
+      ],
+      "audio": {
+        "name": "penculikan-karet-dan-karet-pencuri",
+        "catchphrase": "Penculikan!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/7/74/The_glue_who_kidnaps_ch.png/300px-The_glue_who_kidnaps_ch.png"
+    },
+    {
+      "id": "tric-trac-barabum",
+      "name": "Tric Trac Barabum",
+      "origin": "Italian",
+      "species": "Zucchini (Iconic)Proboicis Monkey (OG)",
+      "fameBase": 530,
+      "tier": "RARE",
+      "emoji": "🐒",
+      "description": "A mysterious Zucchini (Iconic)Proboicis Monkey (OG) creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Tric Strike",
+        "Zucchini Power",
+        "Limoncello Splash"
+      ],
+      "audio": {
+        "name": "tric-trac-barabum",
+        "catchphrase": "Tric!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/f/f1/Tric_Trac_Baraboom.png/299px-Tric_Trac_Baraboom.png"
+    },
+    {
+      "id": "brr-es-teh-patipum",
+      "name": "Brr Es Teh Patipum",
+      "origin": "Indonesian",
+      "species": "Iced Tea",
+      "fameBase": 482,
+      "tier": "RARE",
+      "emoji": "🧊",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Brr Strike",
+        "Iced Power",
+        "Roman Strike"
+      ],
+      "audio": {
+        "name": "brr-es-teh-patipum",
+        "catchphrase": "Brr!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/a/a2/Brr_es_patipum.jpg/300px-Brr_es_patipum.jpg"
+    },
+    {
+      "id": "kingking",
+      "name": "KINGKING",
+      "origin": "Italian",
+      "species": "kawaiii girl",
+      "fameBase": 507,
+      "tier": "RARE",
+      "emoji": "👑",
+      "description": "A mysterious kawaiii girl creature from the Italian Brainrot universe.",
+      "abilities": [
+        "KINGKING Strike",
+        "kawaiii Power",
+        "Colosseum Slam"
+      ],
+      "audio": {
+        "name": "kingking",
+        "catchphrase": "KINGKING!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/6/64/Female-icon.png/16px-Female-icon.png"
+    },
+    {
+      "id": "luguanluguanlulushijiandaole",
+      "name": "Luguanluguanlulushijiandaole",
+      "origin": "Italian",
+      "species": "Deer",
+      "fameBase": 466,
+      "tier": "RARE",
+      "emoji": "🦌",
+      "description": "A mysterious Deer creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Luguanluguanlulushijiandaole Strike",
+        "Deer Power",
+        "Italian Rage"
+      ],
+      "audio": {
+        "name": "luguanluguanlulushijiandaole",
+        "catchphrase": "Luguanluguanlulushijiandaole!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/4/49/C374068e10ecdbac4b9708156664daa01259987044.jpg/300px-C374068e10ecdbac4b9708156664daa01259987044.jpg"
+    },
+    {
+      "id": "tanner-taki",
+      "name": "Tanner Taki",
+      "origin": "English",
+      "species": "taki",
+      "fameBase": 455,
+      "tier": "RARE",
+      "emoji": "🔮",
+      "description": "Tanner Taki appears as a chip from the popular chip brand, Takis.",
+      "abilities": [
+        "Tanner Strike",
+        "taki Power",
+        "Opera Scream"
+      ],
+      "audio": {
+        "name": "tanner-taki",
+        "catchphrase": "Tanner!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/7/7f/Takis.png/300px-Takis.png"
+    },
+    {
+      "id": "pipicry",
+      "name": "Pipicry",
+      "origin": "Italian",
+      "species": "Lyrebird",
+      "fameBase": 484,
+      "tier": "RARE",
+      "emoji": "🐦",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Pipicry Strike",
+        "Lyrebird Power",
+        "Espresso Rush"
+      ],
+      "audio": {
+        "name": "pipicry",
+        "catchphrase": "Pipicry!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/5/50/Pipicry_strawberry.png/300px-Pipicry_strawberry.png"
+    },
+    {
+      "id": "emile-starche",
+      "name": "Emile Starche",
+      "origin": "Italian",
+      "species": "French bread",
+      "fameBase": 517,
+      "tier": "RARE",
+      "emoji": "⭐",
+      "description": "Overview • Relationships • Abilities • Variants • Gallery • History",
+      "abilities": [
+        "Emile Strike",
+        "French Power",
+        "Parmesan Shield"
+      ],
+      "audio": {
+        "name": "emile-starche",
+        "catchphrase": "Emile!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/7/75/F6b05c84-12db-44eb-99a3-c9f3a86d0f60.webp/300px-F6b05c84-12db-44eb-99a3-c9f3a86d0f60.webp.png"
+    },
+    {
+      "id": "paustad",
+      "name": "Paustad",
+      "origin": "Indonesian",
+      "species": "Whale",
+      "fameBase": 518,
+      "tier": "RARE",
+      "emoji": "🐋",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Paustad Strike",
+        "Whale Power",
+        "Meme Blast"
+      ],
+      "audio": {
+        "name": "paustad",
+        "catchphrase": "Paustad!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/3/3c/Paustad.png/300px-Paustad.png"
+    },
+    {
+      "id": "uno-uno-uno-sahur",
+      "name": "Uno Uno Uno Sahur",
+      "origin": "Spanish",
+      "species": "Uno Card",
+      "fameBase": 493,
+      "tier": "RARE",
+      "emoji": "🏎️",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Uno Strike",
+        "Uno Power",
+        "Venice Flood"
+      ],
+      "audio": {
+        "name": "uno-uno-uno-sahur",
+        "catchphrase": "Uno!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/7/7b/Uno.jpeg/300px-Uno.jpeg"
+    },
+    {
+      "id": "vstavai-shtanishki-odevai",
+      "name": "Vstavai Shtanishki Odevai",
+      "origin": "Russian",
+      "species": "Clock",
+      "fameBase": 478,
+      "tier": "RARE",
+      "emoji": "🔮",
+      "description": "A mysterious Clock creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Vstavai Strike",
+        "Clock Power",
+        "Brainrot Beam"
+      ],
+      "audio": {
+        "name": "vstavai-shtanishki-odevai",
+        "catchphrase": "Vstavai!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/b/b3/BlueClock.png/300px-BlueClock.png"
+    },
+    {
+      "id": "ta-ta-ta-te-te-te-ti-ti-ti-to-to-to-tu-tu-tu-sahur",
+      "name": "Ta Ta Ta Te Te Te Ti Ti Ti To To To Tu Tu Tu Sahur",
+      "origin": "Indonesian",
+      "species": "Cupboard, Building, Metal Pole, Teapot, Brick",
+      "fameBase": 398,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "A mysterious Cupboard, Building, Metal Pole, Teapot, Brick creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Sahur Strike",
+        "Cupboard Power",
+        "Cannoli Cannon"
+      ],
+      "audio": {
+        "name": "ta-ta-ta-te-te-te-ti-ti-ti-to-to-to-tu-tu-tu-sahur",
+        "catchphrase": "Ta!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/c/c2/Taeiousahur.jpg/300px-Taeiousahur.jpg"
+    },
+    {
+      "id": "pingvinator-termoregullator",
+      "name": "Pingvinator Termoregullator",
+      "origin": "Italian",
+      "species": "Penguin, air conditioner",
+      "fameBase": 356,
+      "tier": "COMMON",
+      "emoji": "🐧",
+      "description": "A mysterious Penguin, air conditioner creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Pingvinator Strike",
+        "Penguin Power",
+        "Panettone Pummel"
+      ],
+      "audio": {
+        "name": "pingvinator-termoregullator",
+        "catchphrase": "Pingvinator!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/3/38/Pinginator_Termolegulator.png/300px-Pinginator_Termolegulator.png"
+    },
+    {
+      "id": "zebraccio-spinoso",
+      "name": "Zebraccio Spinoso",
+      "origin": "Italian",
+      "species": "Zibra, Cactus",
+      "fameBase": 272,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "A mysterious Zibra, Cactus creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Zebraccio Strike",
+        "Zibra Power",
+        "Italian Rage"
+      ],
+      "audio": {
+        "name": "zebraccio-spinoso",
+        "catchphrase": "Zebraccio!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/f/f5/422e1664-b647-4af4-b918-da8458d987e4.webp/300px-422e1664-b647-4af4-b918-da8458d987e4.webp.png"
+    },
+    {
+      "id": "boneca-ambalabu",
+      "name": "Boneca Ambalabu",
+      "origin": "Indonesian",
+      "species": "Frog with tire (February 2025), Pigeon in toilet and snail with a tiger's head (January 2025), Labubu with cursed face (2024) Rich Cow (Early 2025)",
+      "fameBase": 339,
+      "tier": "COMMON",
+      "emoji": "🐸",
+      "description": "A mysterious Frog with tire (February 2025), Pigeon in toilet and snail with a tiger's head (January 2025), Labubu with cursed face (2024) Rich Cow (Early 2025) creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Boneca Strike",
+        "Frog Power",
+        "Venice Flood"
+      ],
+      "audio": {
+        "name": "boneca-ambalabu",
+        "catchphrase": "Boneca!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/3/3e/Boneka-Ambalabu.png/300px-Boneka-Ambalabu.png"
+    },
+    {
+      "id": "miguelini-brazilini",
+      "name": "Miguelini Brazilini",
+      "origin": "Italian",
+      "species": "Brazil Flag, Sunglasses",
+      "fameBase": 305,
+      "tier": "COMMON",
+      "emoji": "☀️",
+      "description": "A mysterious Brazil Flag, Sunglasses creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Miguelini Strike",
+        "Brazil Power",
+        "Spaghetti Whip"
+      ],
+      "audio": {
+        "name": "miguelini-brazilini",
+        "catchphrase": "Miguelini!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/3/38/Miguelini.png/300px-Miguelini.png"
+    },
+    {
+      "id": "frigo-camelo",
+      "name": "Frigo Camelo",
+      "origin": "Italian",
+      "species": "Camel",
+      "fameBase": 342,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Frigo Strike",
+        "Camel Power",
+        "Vibe Check"
+      ],
+      "audio": {
+        "name": "frigo-camelo",
+        "catchphrase": "Frigo!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/6/61/Frigo_Camelo.jpg"
+    },
+    {
+      "id": "pakrahmatmamatmatmatung",
+      "name": "Pakrahmatmamatmatmatung",
+      "origin": "Italian",
+      "species": "Pencil",
+      "fameBase": 370,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Pakrahmatmamatmatmatung Strike",
+        "Pencil Power",
+        "Roman Strike"
+      ],
+      "audio": {
+        "name": "pakrahmatmamatmatmatung",
+        "catchphrase": "Pakrahmatmamatmatmatung!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/b/ba/Pakmat.jpeg/300px-Pakmat.jpeg"
+    },
+    {
+      "id": "pakistan-pakistan-sahur",
+      "name": "Pakistan Pakistan Sahur",
+      "origin": "Italian",
+      "species": "Flag",
+      "fameBase": 297,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "\"Ooh, shiny...\" - Doi Doi Doi Sahur",
+      "abilities": [
+        "Pakistan Strike",
+        "Flag Power",
+        "Venice Flood"
+      ],
+      "audio": {
+        "name": "pakistan-pakistan-sahur",
+        "catchphrase": "Pakistan!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/e/e2/ChatGPT_Image_Jan_11%2C_2026%2C_04_40_00_PM.png/300px-ChatGPT_Image_Jan_11%2C_2026%2C_04_40_00_PM.png"
+    },
+    {
+      "id": "can-can-can-can-can-sahur",
+      "name": "Can Can Can Can Can Sahur",
+      "origin": "Indonesian",
+      "species": "Human",
+      "fameBase": 305,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "A mysterious Human creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Can Strike",
+        "Human Power",
+        "Pizza Toss"
+      ],
+      "audio": {
+        "name": "can-can-can-can-can-sahur",
+        "catchphrase": "Can!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/7/74/Can_can_can_can_sahur.png/300px-Can_can_can_can_sahur.png"
+    },
+    {
+      "id": "jimoyouyu",
+      "name": "Jimoyouyu",
+      "origin": "Italian",
+      "species": "Rooster,Squid,LemonHorseElephantCrane,KirinSquirrel,DuckChimpanzee,OrangeMonkey,OctopusMosquito",
+      "fameBase": 360,
+      "tier": "COMMON",
+      "emoji": "🐘",
+      "description": "A mysterious Rooster,Squid,LemonHorseElephantCrane,KirinSquirrel,DuckChimpanzee,OrangeMonkey,OctopusMosquito creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Jimoyouyu Strike",
+        "Rooster Power",
+        "Colosseum Slam"
+      ],
+      "audio": {
+        "name": "jimoyouyu",
+        "catchphrase": "Jimoyouyu!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/0/0b/Jimoyouyu.jpg/300px-Jimoyouyu.jpg"
+    },
+    {
+      "id": "hipopotamino-supermarketino",
+      "name": "Hipopotamino Supermarketino",
+      "origin": "Italian",
+      "species": "Hippo, supermarket",
+      "fameBase": 280,
+      "tier": "COMMON",
+      "emoji": "🦛",
+      "description": "A mysterious Hippo, supermarket creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Hipopotamino Strike",
+        "Hippo Power",
+        "Brainrot Beam"
+      ],
+      "audio": {
+        "name": "hipopotamino-supermarketino",
+        "catchphrase": "Hipopotamino!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/f/f3/Hippo.png/300px-Hippo.png"
+    },
+    {
+      "id": "cincincincincincincincincinino-tornellototo",
+      "name": "Cincincincincincincincincinino Tornellototo",
+      "origin": "Chinese",
+      "species": "Reinforcement steel",
+      "fameBase": 334,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "A mysterious Reinforcement steel creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Cincincincincincincincincinino Strike",
+        "Reinforcement Power",
+        "Roman Strike"
+      ],
+      "audio": {
+        "name": "cincincincincincincincincinino-tornellototo",
+        "catchphrase": "Cincincincincincincincincinino!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/c/cd/Cin.jpg/300px-Cin.jpg"
+    },
+    {
+      "id": "kaskeskos-karkerkor",
+      "name": "Kaskeskos Karkerkor",
+      "origin": "Indonesian",
+      "species": "Book",
+      "fameBase": 311,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "A mysterious Book creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Kaskeskos Strike",
+        "Book Power",
+        "Roman Strike"
+      ],
+      "audio": {
+        "name": "kaskeskos-karkerkor",
+        "catchphrase": "Kaskeskos!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/5/59/Mtk_seram.png/300px-Mtk_seram.png"
+    },
+    {
+      "id": "sigma-sigma-ay",
+      "name": "Sigma Sigma Çay",
+      "origin": "Italian",
+      "species": "Tea",
+      "fameBase": 359,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "A mysterious Tea creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Sigma Strike",
+        "Tea Power",
+        "Pizza Toss"
+      ],
+      "audio": {
+        "name": "sigma-sigma-ay",
+        "catchphrase": "Sigma!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/9/91/Sigma_Sigma_%C3%87ay.jpg/300px-Sigma_Sigma_%C3%87ay.jpg"
+    },
+    {
+      "id": "drago-polpo",
+      "name": "Drago Polpo",
+      "origin": "Italian",
+      "species": "Dragon, Octopus",
+      "fameBase": 307,
+      "tier": "COMMON",
+      "emoji": "🐉",
+      "description": "A mysterious Dragon, Octopus creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Drago Strike",
+        "Dragon Power",
+        "Panettone Pummel"
+      ],
+      "audio": {
+        "name": "drago-polpo",
+        "catchphrase": "Drago!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/9/9f/Drago_Polpo.jpeg/300px-Drago_Polpo.jpeg"
+    },
+    {
+      "id": "eme-eme-sahur",
+      "name": "Eme Eme Sahur",
+      "origin": "Italian",
+      "species": "Emerald",
+      "fameBase": 331,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "A mysterious Emerald creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Eme Strike",
+        "Emerald Power",
+        "Pasta Fury"
+      ],
+      "audio": {
+        "name": "eme-eme-sahur",
+        "catchphrase": "Eme!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/1/12/ChatGPT_Image_24_de_set._de_2025%2C_16_51_58.png/300px-ChatGPT_Image_24_de_set._de_2025%2C_16_51_58.png"
+    },
+    {
+      "id": "sap-sap-sap-sahur",
+      "name": "Sap Sap Sap Sahur",
+      "origin": "Italian",
+      "species": "Sapphire",
+      "fameBase": 326,
+      "tier": "COMMON",
+      "emoji": "🔮",
+      "description": "A mysterious Sapphire creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Sap Strike",
+        "Sapphire Power",
+        "Bruschetta Bash"
+      ],
+      "audio": {
+        "name": "sap-sap-sap-sahur",
+        "catchphrase": "Sap!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/a/a3/ChatGPT_Image_24_de_set._de_2025%2C_21_31_42.png/300px-ChatGPT_Image_24_de_set._de_2025%2C_21_31_42.png"
+    },
+    {
+      "id": "ecco-cavallo-virtuoso",
+      "name": "Ecco Cavallo Virtuoso",
+      "origin": "Italian",
+      "species": "Horse, Piano",
+      "fameBase": 359,
+      "tier": "COMMON",
+      "emoji": "🐎",
+      "description": "A mysterious Horse, Piano creature from the Italian Brainrot universe.",
+      "abilities": [
+        "Ecco Strike",
+        "Horse Power",
+        "Italian Rage"
+      ],
+      "audio": {
+        "name": "ecco-cavallo-virtuoso",
+        "catchphrase": "Ecco!"
+      },
+      "wikiImageUrl": "https://static.wikitide.net/italianbrainrotwiki/thumb/8/8d/Caballopiano.jpg/300px-Caballopiano.jpg"
+    }
+  ]
+}
