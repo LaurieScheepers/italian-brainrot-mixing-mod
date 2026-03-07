@@ -625,8 +625,10 @@ function spawnParticles(container, count = 25, color = null) {
 function renderCollection() {
     elements.collectionGrid.innerHTML = '';
 
-    state.collection.forEach(char => {
+    state.collection.forEach((char, i) => {
         const card = createCharacterCard(char, 'collection');
+        card.classList.add('card-enter');
+        card.style.animationDelay = `${i * 50}ms`;
         elements.collectionGrid.appendChild(card);
     });
 }
@@ -733,10 +735,11 @@ async function performMix() {
     const parents = state.mixSlots.filter(Boolean);
     if (parents.length < 2) return;
 
-    // Animate button
+    // Animate button + vortex
     elements.mixButton.classList.add('mixing');
     elements.mixButton.disabled = true;
     elements.mixButton.textContent = 'MIXING...';
+    elements.mixingBowl.classList.add('mixing-vortex');
 
     // Play mixing sound
     playMixing();
@@ -790,6 +793,7 @@ async function performMix() {
         state.mixSlots = new Array(state.maxSlots).fill(null);
         elements.mixingBowl.querySelectorAll('.mix-slot').forEach(slot => clearSlotDisplay(slot));
 
+        elements.mixingBowl.classList.remove('mixing-vortex');
         elements.mixButton.classList.remove('mixing');
         elements.mixButton.textContent = 'MIX!';
         updateMixButton();
@@ -834,7 +838,7 @@ function showResult(char, isSpecial) {
         resultImg.addEventListener('click', () => openLightbox(resultImg.src, char.name));
     }
 
-    // Particle burst on mix success
+    // Enhanced particles based on tier and parent count
     const tierColors = {
         COMMON: '#888888',
         RARE: '#3498db',
@@ -843,8 +847,21 @@ function showResult(char, isSpecial) {
         MYTHIC: '#ff6b9d'
     };
     const particleColor = isSpecial ? '#ffd700' : (tierColors[char.tier] || '#ffd700');
-    const particleCount = isSpecial ? 35 : 25;
+    const parentCount = char.parentNames?.length || 2;
+    const particleCount = (isSpecial ? 40 : 20) + (parentCount * 5);
     setTimeout(() => spawnParticles(elements.resultCharacter, particleCount, particleColor), 100);
+
+    // Screen shake for Legendary/Mythic
+    if (char.tier === 'LEGENDARY' || char.tier === 'MYTHIC') {
+        document.getElementById('game-screen').classList.add('screen-shake');
+        setTimeout(() => document.getElementById('game-screen').classList.remove('screen-shake'), 500);
+    }
+
+    // Tier flash for upgraded results
+    const resultCard = elements.resultCharacter.querySelector('.character-card');
+    if (resultCard) {
+        resultCard.classList.add('tier-flash');
+    }
 }
 
 /**

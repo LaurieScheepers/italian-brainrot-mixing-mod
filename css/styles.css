@@ -813,10 +813,66 @@ body::before {
     animation: slotUnlock 0.6s ease-out;
 }
 
+/* Slot unlock animation */
 @keyframes slotUnlock {
     0% { transform: scale(0); opacity: 0; }
     60% { transform: scale(1.2); }
     100% { transform: scale(1); opacity: 1; }
+}
+
+/* Screen shake for Legendary/Mythic results */
+.screen-shake {
+    animation: screenShake 0.5s ease-in-out;
+}
+
+@keyframes screenShake {
+    0%, 100% { transform: translate(0, 0); }
+    15% { transform: translate(-5px, -3px); }
+    30% { transform: translate(5px, 2px); }
+    45% { transform: translate(-3px, 5px); }
+    60% { transform: translate(3px, -2px); }
+    75% { transform: translate(-2px, 3px); }
+}
+
+/* Mixing vortex on bowl */
+.mixing-vortex {
+    background: conic-gradient(from 0deg, #ff6b9d, #ffd700, #00f5ff, #39ff14, #ff6b9d) !important;
+    background-size: 100% 100% !important;
+    animation: vortexSpin 0.8s linear infinite !important;
+}
+
+@keyframes vortexSpin {
+    to { filter: hue-rotate(360deg); }
+}
+
+/* Tier upgrade flash */
+.tier-flash {
+    animation: tierFlash 0.3s ease-out;
+}
+
+@keyframes tierFlash {
+    0% { filter: brightness(3); }
+    100% { filter: brightness(1); }
+}
+
+/* Staggered card entry */
+.card-enter {
+    animation: cardFadeIn 0.3s ease-out both;
+}
+
+@keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Star particle for special effects */
+.particle-star {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    animation: particleBurst 1s ease-out forwards;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
 }
 
 .shake {
