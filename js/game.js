@@ -241,8 +241,8 @@ function cacheElements() {
 
         // Boss screen
         finalBossDisplay: document.getElementById('final-boss-display'),
-        newGamePlusBtn: document.getElementById('new-game-plus-btn'),
-        sandboxBtn: document.getElementById('sandbox-btn'),
+        viewCollectionBtn: document.getElementById('view-collection-btn'),
+        startMixingBtn: document.getElementById('start-mixing-btn'),
         shareBtn: document.getElementById('share-btn'),
 
         // Lightbox
@@ -291,8 +291,8 @@ function setupEventListeners() {
     elements.collectBtn.addEventListener('click', collectResult);
 
     // Endgame buttons
-    elements.newGamePlusBtn?.addEventListener('click', newGamePlus);
-    elements.sandboxBtn?.addEventListener('click', enterSandbox);
+    elements.viewCollectionBtn?.addEventListener('click', viewCollectionFromBoss);
+    elements.startMixingBtn?.addEventListener('click', startMixingAgain);
     elements.shareBtn?.addEventListener('click', shareChallenge);
 
     // Drag and drop for mixing bowl slots (dynamic for progressive unlock)
@@ -359,10 +359,24 @@ function handleApiKeyInput(e) {
  * Render the starter selection screen
  */
 function renderStarterScreen() {
-    const characters = getAllBaseCharacters();
+    const baseChars = getAllBaseCharacters();
+    const createdChars = JSON.parse(localStorage.getItem('brainrot_created') || '[]');
+
+    // Merge: base characters first, then player-created ones
+    const baseIds = new Set(baseChars.map(c => c.id));
+    const allChars = [...baseChars, ...createdChars.filter(c => !baseIds.has(c.id))];
+
     elements.starterGrid.innerHTML = '';
 
-    characters.forEach(char => {
+    // Show created characters count if any
+    if (createdChars.length > 0) {
+        const label = document.createElement('div');
+        label.style.cssText = 'grid-column: 1/-1; text-align: center; color: var(--accent-gold); font-family: Bangers, cursive; font-size: 1.1rem; padding: 5px;';
+        label.textContent = `${allChars.length} characters (${createdChars.length} created by YOU!)`;
+        elements.starterGrid.appendChild(label);
+    }
+
+    allChars.forEach(char => {
         const card = createCharacterCard(char, 'starter');
         elements.starterGrid.appendChild(card);
     });
@@ -1235,29 +1249,56 @@ function becomeFinalBoss(finalChar) {
 }
 
 /**
- * Endgame functions
+ * View collection from boss screen
  */
-function newGamePlus() {
-    // Reset with bonuses
+function viewCollectionFromBoss() {
+    switchScreen('game');
+    renderCollection();
+}
+
+/**
+ * Start a new mixing round — keeps fame, adds mixed chars to starter pool
+ */
+function startMixingAgain() {
+    // Persist created characters to the starter pool
+    persistCreatedCharacters();
+
+    // Reset game state but keep fame and infinity coins
     state.selectedStarters = [];
-    state.collection = [];
     state.mixSlots = new Array(state.maxSlots).fill(null);
-    state.mixCount = 0;
     state.lastResult = null;
-    // Keep some fame as bonus
-    state.totalFame = Math.floor(state.totalFame * 0.1);
-    state.totalCoins = 0;
-    state.isFinalBoss = false;
+    state.collection = [];
+    // Keep totalFame, keep isFinalBoss (infinity coins)
 
     localStorage.removeItem('brainrot_save');
     switchScreen('starter');
     renderStarterScreen();
 }
 
-function enterSandbox() {
-    // Just go back to game with all characters
-    state.isFinalBoss = true; // Keep infinity coins
-    switchScreen('game');
+/**
+ * Add created (mixed) characters to the persistent starter pool
+ * so they appear alongside base characters in future games.
+ */
+function persistCreatedCharacters() {
+    const saved = JSON.parse(localStorage.getItem('brainrot_created') || '[]');
+    const existingIds = new Set(saved.map(c => c.id));
+
+    for (const char of state.collection) {
+        // Only persist mixed characters (have parents), skip base chars
+        if (char.parents && char.parents.length > 0 && !existingIds.has(char.id)) {
+            saved.push({
+                id: char.id, name: char.name, nickname: char.nickname,
+                tier: char.tier, fameBase: char.fameBase,
+                emoji: char.emoji, species: char.species, origin: char.origin || 'Mixed',
+                abilities: char.abilities, description: char.description,
+                audio: char.audio, wikiImageUrl: char.wikiImageUrl,
+                localImage: char.localImage
+            });
+            existingIds.add(char.id);
+        }
+    }
+
+    localStorage.setItem('brainrot_created', JSON.stringify(saved));
 }
 
 function shareChallenge() {
