@@ -28,6 +28,7 @@ import {
     getAudioState
 } from './audio.js';
 import { checkAchievements, getEarnedAchievements, getAllAchievements } from './achievements.js';
+import { renderFamilyTree } from './family-tree.js';
 
 // Progressive unlock thresholds
 const UNLOCK_THRESHOLDS = { 3: 5, 4: 15 }; // slots: mixCount needed
@@ -51,7 +52,8 @@ const state = {
     challengeSeed: null,
     specialCombosFound: 0,
     highestTierCreated: null,
-    lastMixParentCount: 0
+    lastMixParentCount: 0,
+    collectionSort: 'newest'
 };
 
 // Tap-to-place state (mobile support)
@@ -303,6 +305,9 @@ function setupEventListeners() {
 
     // Combo book button
     document.getElementById('combo-book-btn')?.addEventListener('click', openComboBook);
+
+    // Family tree button
+    document.getElementById('family-tree-btn')?.addEventListener('click', openFamilyTree);
 }
 
 /**
@@ -703,17 +708,77 @@ function spawnParticles(container, count = 25, color = null) {
 }
 
 /**
+ * Get collection sorted by current sort preference (purely visual)
+ */
+function getSortedCollection() {
+    const TIER_ORDER = { MYTHIC: 5, LEGENDARY: 4, EPIC: 3, RARE: 2, COMMON: 1 };
+    const sorted = [...state.collection];
+
+    switch (state.collectionSort) {
+        case 'fame-desc':
+            sorted.sort((a, b) => (b.fameBase || 0) - (a.fameBase || 0));
+            break;
+        case 'fame-asc':
+            sorted.sort((a, b) => (a.fameBase || 0) - (b.fameBase || 0));
+            break;
+        case 'tier':
+            sorted.sort((a, b) => (TIER_ORDER[b.tier] || 0) - (TIER_ORDER[a.tier] || 0));
+            break;
+        case 'name':
+            sorted.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case 'newest':
+        default:
+            // Keep original order (insertion order)
+            break;
+    }
+    return sorted;
+}
+
+/**
+ * Render sort controls above the collection grid
+ */
+function renderSortControls() {
+    const controls = document.getElementById('sort-controls');
+    if (!controls) return;
+
+    const options = [
+        { value: 'newest', label: 'Newest' },
+        { value: 'fame-desc', label: 'Fame \u2193' },
+        { value: 'fame-asc', label: 'Fame \u2191' },
+        { value: 'tier', label: 'Tier' },
+        { value: 'name', label: 'A-Z' },
+    ];
+
+    controls.innerHTML = options.map(opt =>
+        `<button class="sort-btn ${state.collectionSort === opt.value ? 'active' : ''}"
+                 data-sort="${opt.value}">${opt.label}</button>`
+    ).join('');
+
+    controls.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.collectionSort = btn.dataset.sort;
+            renderCollection();
+        });
+    });
+}
+
+/**
  * Render the collection grid
  */
 function renderCollection() {
     elements.collectionGrid.innerHTML = '';
 
-    state.collection.forEach((char, i) => {
+    const sorted = getSortedCollection();
+
+    sorted.forEach((char, i) => {
         const card = createCharacterCard(char, 'collection');
         card.classList.add('card-enter');
         card.style.animationDelay = `${i * 50}ms`;
         elements.collectionGrid.appendChild(card);
     });
+
+    renderSortControls();
 }
 
 /**
@@ -1237,6 +1302,15 @@ function openComboBook() {
     // Remove existing if open
     document.getElementById('combo-book-modal')?.remove();
     const html = renderComboBook();
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+/**
+ * Open the Family Tree modal
+ */
+function openFamilyTree() {
+    document.getElementById('family-tree-modal')?.remove();
+    const html = renderFamilyTree(state.collection);
     document.body.insertAdjacentHTML('beforeend', html);
 }
 
