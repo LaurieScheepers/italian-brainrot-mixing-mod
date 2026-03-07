@@ -1,0 +1,13 @@
+{
+  "name": "italian-brainrot-mixing-mod",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Mix Italian Brainrot characters to create powerful hybrids!",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "test": "node --experimental-vm-modules tests/test-mixing.js",
+    "generate-portraits": "node scripts/generate-portraits.mjs"
+  },
+  "author": "Luka & Pappa",
+  "license": "MIT"
+}

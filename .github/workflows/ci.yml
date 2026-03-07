@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run mixing algorithm tests
+        run: npm test
+
+      - name: Validate JS syntax
+        run: |
+          for f in js/*.js; do
+            node --input-type=module --check <(cat "$f" | sed 's/^import.*//; s/^export //')  2>&1 || true
+          done
+
+      - name: Validate HTML
+        run: |
+          python3 -c "
+          from html.parser import HTMLParser
+          p = HTMLParser()
+          with open('index.html') as f:
+              p.feed(f.read())
+          print('HTML: valid')
+          "

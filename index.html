@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Italian Brainrot Mixing Mod</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,21 +112,12 @@
             <span class="challenge-seed-label">Seed: <span id="challenge-seed">-</span></span>
         </div>
 
-        <!-- Mixing Bowl Area -->
-        <div class="mixing-area">
-            <h2 class="section-title">MIXING BOWL</h2>
-            <div id="mixing-bowl" class="mixing-bowl">
-                <div id="slot-1" class="mix-slot" data-slot="1">
-                    <span class="slot-label">Drop Here</span>
-                </div>
-                <div class="mix-operator">+</div>
-                <div id="slot-2" class="mix-slot" data-slot="2">
-                    <span class="slot-label">Drop Here</span>
-                </div>
+        <!-- Collection Area (scrollable, above fixed bowl) -->
+        <div class="collection-area">
+            <h2 class="section-title">YOUR COLLECTION</h2>
+            <div id="collection-grid" class="character-grid">
+                <!-- Collection characters will be inserted here by JS -->
             </div>
-            <button id="mix-button" class="mix-button" disabled>
-                MIX!
-            </button>
         </div>
 
         <!-- Result Display -->
@@ -138,12 +129,14 @@
             <button id="collect-btn" class="collect-button">COLLECT!</button>
         </div>
 
-        <!-- Collection Area -->
-        <div class="collection-area">
-            <h2 class="section-title">YOUR COLLECTION</h2>
-            <div id="collection-grid" class="character-grid">
-                <!-- Collection characters will be inserted here by JS -->
+        <!-- Mixing Bowl Area (fixed at bottom, dynamic slots) -->
+        <div class="mixing-area">
+            <div id="mixing-bowl" class="mixing-bowl">
+                <!-- Slots rendered dynamically by JS -->
             </div>
+            <button id="mix-button" class="mix-button" disabled>
+                MIX!
+            </button>
         </div>
 
         <!-- Share FAB -->

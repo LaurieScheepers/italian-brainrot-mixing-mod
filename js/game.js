@@ -27,6 +27,9 @@ import {
     getAudioState
 } from './audio.js';
 
+// Progressive unlock thresholds
+const UNLOCK_THRESHOLDS = { 3: 5, 4: 15 }; // slots: mixCount needed
+
 // Game State
 const state = {
     screen: 'parents-zone',
@@ -36,6 +39,7 @@ const state = {
     totalFame: 0,
     totalCoins: 0,
     mixCount: 0,
+    maxSlots: 2,
     globalSeed: Date.now(),
     mixSlots: [null, null],
     lastResult: null,
@@ -47,6 +51,23 @@ const state = {
 
 // Tap-to-place state (mobile support)
 let selectedForMix = null;
+
+/**
+ * Render character image with fallback chain (DRY)
+ * Priority: generatedImage > localImage > wikiImageUrl > emoji
+ */
+function renderCharacterImage(char, style = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;') {
+    if (char.generatedImage) {
+        return `<img src="${char.generatedImage}" alt="${char.name}" style="${style}">`;
+    }
+    if (char.localImage) {
+        return `<img src="${char.localImage}" alt="${char.name}" style="${style}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
+    }
+    if (char.wikiImageUrl) {
+        return `<img src="${char.wikiImageUrl}" alt="${char.name}" style="${style}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
+    }
+    return char.emoji;
+}
 
 // DOM Elements
 let elements = {};
@@ -73,6 +94,52 @@ function addAudioControls() {
 }
 
 /**
+ * Save game state to localStorage (metadata only, images stay in IndexedDB)
+ */
+function saveGameState() {
+    const saveData = {
+        collection: state.collection.map(c => ({
+            id: c.id, name: c.name, tier: c.tier, fameBase: c.fameBase,
+            emoji: c.emoji, species: c.species, origin: c.origin,
+            abilities: c.abilities, parents: c.parents, parentNames: c.parentNames,
+            generationDepth: c.generationDepth, isCombo: c.isCombo, seed: c.seed,
+            localImage: c.localImage, wikiImageUrl: c.wikiImageUrl,
+            audio: c.audio, description: c.description
+        })),
+        totalFame: state.totalFame,
+        totalCoins: state.totalCoins,
+        mixCount: state.mixCount,
+        maxSlots: state.maxSlots,
+        globalSeed: state.globalSeed,
+        selectedStarters: state.selectedStarters
+    };
+    localStorage.setItem('brainrot_save', JSON.stringify(saveData));
+}
+
+/**
+ * Load saved game state from localStorage
+ */
+function loadGameState() {
+    const saved = localStorage.getItem('brainrot_save');
+    if (!saved) return false;
+
+    try {
+        const data = JSON.parse(saved);
+        state.collection = data.collection || [];
+        state.totalFame = data.totalFame || 0;
+        state.totalCoins = data.totalCoins || 0;
+        state.mixCount = data.mixCount || 0;
+        state.maxSlots = data.maxSlots || 2;
+        state.globalSeed = data.globalSeed || Date.now();
+        state.selectedStarters = data.selectedStarters || [];
+        return true;
+    } catch (e) {
+        console.warn('Failed to load save data:', e);
+        return false;
+    }
+}
+
+/**
  * Load saved preferences from localStorage
  */
 function loadSavedPreferences() {
@@ -88,6 +155,25 @@ function loadSavedPreferences() {
     if (savedApiKey) {
         initGeminiFromStorage();
         state.geminiConfigured = true;
+    }
+
+    // Check for challenge URL first (overrides save)
+    if (state.isChallenge) return;
+
+    // Try to resume saved game
+    if (savedRating && loadGameState() && state.collection.length > 0) {
+        if (confirm('Continue where you left off?')) {
+            switchScreen('game');
+            renderMixSlots();
+            renderCollection();
+            updateStats();
+            if (state.isChallenge && elements.challengeBanner) {
+                elements.challengeBanner.classList.remove('hidden');
+            }
+            return;
+        }
+        // User chose not to continue - clear save
+        localStorage.removeItem('brainrot_save');
     }
 
     // If returning user, skip Parents Zone
@@ -124,8 +210,6 @@ function cacheElements() {
         totalCoins: document.getElementById('total-coins'),
         mixCount: document.getElementById('mix-count'),
         mixingBowl: document.getElementById('mixing-bowl'),
-        slot1: document.getElementById('slot-1'),
-        slot2: document.getElementById('slot-2'),
         mixButton: document.getElementById('mix-button'),
         resultArea: document.getElementById('result-area'),
         resultCharacter: document.getElementById('result-character'),
@@ -188,14 +272,8 @@ function setupEventListeners() {
     elements.sandboxBtn?.addEventListener('click', enterSandbox);
     elements.shareBtn?.addEventListener('click', shareChallenge);
 
-    // Drag and drop for mixing bowl slots
-    [elements.slot1, elements.slot2].forEach((slot, i) => {
-        slot.addEventListener('dragover', handleDragOver);
-        slot.addEventListener('dragleave', handleDragLeave);
-        slot.addEventListener('drop', handleDrop);
-        // Tap-to-place: clicking a slot places the selected card
-        slot.addEventListener('click', () => handleSlotTap(i));
-    });
+    // Drag and drop for mixing bowl slots (dynamic for progressive unlock)
+    setupSlotListeners();
 
     // Lightbox
     elements.lightbox?.querySelector('.lightbox-backdrop')?.addEventListener('click', closeLightbox);
@@ -275,29 +353,13 @@ function createCharacterCard(char, mode = 'collection') {
         card.addEventListener('dragstart', handleDragStart);
         card.addEventListener('dragend', handleDragEnd);
         // Tap-to-place for mobile
-        card.addEventListener('click', (e) => {
-            // Don't trigger tap if clicking lightbox image
-            if (e.target.closest('.character-image img')) return;
-            handleCardTap(char.id);
-        });
+        card.addEventListener('click', () => handleCardTap(char.id));
     } else if (mode === 'starter') {
         card.addEventListener('click', () => toggleStarterSelection(char.id));
     }
 
     const fame = calculateDisplayFame(char);
-
-    // Image priority: generated (AI fusion) > local portrait > wiki > emoji
-    let imageContent;
-    const imgStyle = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;';
-    if (char.generatedImage) {
-        imageContent = `<img src="${char.generatedImage}" alt="${char.name}" style="${imgStyle}">`;
-    } else if (char.localImage) {
-        imageContent = `<img src="${char.localImage}" alt="${char.name}" style="${imgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
-    } else if (char.wikiImageUrl) {
-        imageContent = `<img src="${char.wikiImageUrl}" alt="${char.name}" style="${imgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
-    } else {
-        imageContent = char.emoji;
-    }
+    const imageContent = renderCharacterImage(char);
 
     card.innerHTML = `
         <span class="tier-badge ${tierClass}">${char.tier}</span>
@@ -306,14 +368,24 @@ function createCharacterCard(char, mode = 'collection') {
         <div class="character-fame">${fame.toLocaleString()}</div>
     `;
 
-    // Lightbox: click image to view fullscreen
+    // Long-press to view fullscreen (KISS for mobile)
     const imgEl = card.querySelector('.character-image img');
     if (imgEl) {
-        imgEl.addEventListener('click', (e) => {
+        let pressTimer;
+        imgEl.style.cursor = 'zoom-in';
+        card.addEventListener('touchstart', (e) => {
+            pressTimer = setTimeout(() => {
+                e.preventDefault();
+                openLightbox(imgEl.src, char.name);
+            }, 500);
+        }, { passive: false });
+        card.addEventListener('touchend', () => clearTimeout(pressTimer));
+        card.addEventListener('touchmove', () => clearTimeout(pressTimer));
+        // Desktop: double-click for lightbox
+        imgEl.addEventListener('dblclick', (e) => {
             e.stopPropagation();
             openLightbox(imgEl.src, char.name);
         });
-        imgEl.style.cursor = 'zoom-in';
     }
 
     return card;
@@ -375,6 +447,9 @@ function startGame() {
     // Switch screens
     switchScreen('game');
 
+    // Render mixing bowl slots for current unlock level
+    renderMixSlots();
+
     // Show challenge banner if in challenge mode
     if (state.isChallenge && elements.challengeBanner) {
         elements.challengeBanner.classList.remove('hidden');
@@ -431,12 +506,16 @@ function handleCardTap(charId) {
         card.classList.toggle('selected-for-mix', card.dataset.characterId === charId);
     });
 
-    // Pulse empty/available slots
-    [elements.slot1, elements.slot2].forEach((slot, i) => {
-        const otherSlot = i === 0 ? 1 : 0;
-        const isAvailable = !state.mixSlots[i] || (state.mixSlots[otherSlot]?.id !== charId);
-        slot.classList.toggle('awaiting-tap', isAvailable && !state.mixSlots[i]);
+    // Pulse empty slots
+    elements.mixingBowl.querySelectorAll('.mix-slot').forEach((slot, i) => {
+        slot.classList.toggle('awaiting-tap', !state.mixSlots[i]);
     });
+
+    // Auto-place if there's an empty slot (KISS for Luka)
+    const emptySlotIdx = state.mixSlots.findIndex(s => s === null);
+    if (emptySlotIdx !== -1) {
+        handleSlotTap(emptySlotIdx);
+    }
 }
 
 /**
@@ -448,19 +527,20 @@ function handleSlotTap(slotIndex) {
     const char = state.collection.find(c => c.id === selectedForMix);
     if (!char) return;
 
-    // Check if already in other slot
-    const otherSlot = slotIndex === 0 ? 1 : 0;
-    if (state.mixSlots[otherSlot]?.id === selectedForMix) {
-        const slotEl = slotIndex === 0 ? elements.slot1 : elements.slot2;
-        slotEl.classList.add('shake');
-        setTimeout(() => slotEl.classList.remove('shake'), 500);
+    // Check if already in another slot
+    if (state.mixSlots.some((s, i) => i !== slotIndex && s?.id === selectedForMix)) {
+        const slotEl = document.getElementById(`slot-${slotIndex + 1}`);
+        if (slotEl) {
+            slotEl.classList.add('shake');
+            setTimeout(() => slotEl.classList.remove('shake'), 500);
+        }
         playError();
         return;
     }
 
     // Place in slot
     state.mixSlots[slotIndex] = char;
-    const slotEl = slotIndex === 0 ? elements.slot1 : elements.slot2;
+    const slotEl = document.getElementById(`slot-${slotIndex + 1}`);
     updateSlotDisplay(slotEl, char);
     updateMixButton();
     playDrop();
@@ -478,9 +558,69 @@ function clearTapSelection() {
     document.querySelectorAll('.character-card.selected-for-mix').forEach(card => {
         card.classList.remove('selected-for-mix');
     });
-    [elements.slot1, elements.slot2].forEach(slot => {
+    elements.mixingBowl.querySelectorAll('.mix-slot').forEach(slot => {
         slot.classList.remove('awaiting-tap');
     });
+}
+
+/**
+ * Render mixing bowl slots dynamically based on maxSlots
+ */
+function renderMixSlots() {
+    const bowl = elements.mixingBowl;
+    bowl.innerHTML = '';
+    state.mixSlots = new Array(state.maxSlots).fill(null);
+
+    for (let i = 0; i < state.maxSlots; i++) {
+        if (i > 0) {
+            const op = document.createElement('div');
+            op.className = 'mix-operator';
+            op.textContent = '+';
+            bowl.appendChild(op);
+        }
+        const slot = document.createElement('div');
+        slot.className = 'mix-slot';
+        slot.dataset.slot = String(i + 1);
+        slot.id = `slot-${i + 1}`;
+        slot.innerHTML = '<span class="slot-label">Drop Here</span>';
+        bowl.appendChild(slot);
+    }
+
+    setupSlotListeners();
+    updateMixButton();
+}
+
+/**
+ * Setup event listeners for all current mix slots
+ */
+function setupSlotListeners() {
+    const slots = elements.mixingBowl.querySelectorAll('.mix-slot');
+    slots.forEach((slot, i) => {
+        slot.addEventListener('dragover', handleDragOver);
+        slot.addEventListener('dragleave', handleDragLeave);
+        slot.addEventListener('drop', handleDrop);
+        slot.addEventListener('click', () => handleSlotTap(i));
+    });
+}
+
+/**
+ * Check and apply progressive unlock
+ */
+function checkProgressiveUnlock() {
+    for (const [slots, threshold] of Object.entries(UNLOCK_THRESHOLDS)) {
+        const slotCount = parseInt(slots);
+        if (state.mixCount >= threshold && state.maxSlots < slotCount) {
+            state.maxSlots = slotCount;
+            renderMixSlots();
+            showToast(`NEW SLOT UNLOCKED! You can now mix ${slotCount} characters!`, 4000);
+            // Particle burst on the new slot
+            const newSlot = document.getElementById(`slot-${slotCount}`);
+            if (newSlot) {
+                newSlot.classList.add('slot-unlock');
+                setTimeout(() => spawnParticles(newSlot, 20, '#ffd700'), 100);
+            }
+        }
+    }
 }
 
 /**
@@ -550,8 +690,10 @@ function spawnParticles(container, count = 25, color = null) {
 function renderCollection() {
     elements.collectionGrid.innerHTML = '';
 
-    state.collection.forEach(char => {
+    state.collection.forEach((char, i) => {
         const card = createCharacterCard(char, 'collection');
+        card.classList.add('card-enter');
+        card.style.animationDelay = `${i * 50}ms`;
         elements.collectionGrid.appendChild(card);
     });
 }
@@ -602,9 +744,8 @@ function handleDrop(e) {
     const char = state.collection.find(c => c.id === charId);
     if (!char) return;
 
-    // Check if already in other slot
-    const otherSlot = slotIndex === 0 ? 1 : 0;
-    if (state.mixSlots[otherSlot]?.id === charId) {
+    // Check if already in another slot
+    if (state.mixSlots.some((s, i) => i !== slotIndex && s?.id === charId)) {
         // Can't use same character in both slots
         e.currentTarget.classList.add('shake');
         setTimeout(() => e.currentTarget.classList.remove('shake'), 500);
@@ -625,18 +766,7 @@ function handleDrop(e) {
  */
 function updateSlotDisplay(slotElement, char) {
     slotElement.classList.add('filled');
-    // Show image in slot if available
-    let slotImage;
-    const slotImgStyle = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;';
-    if (char.generatedImage) {
-        slotImage = `<img src="${char.generatedImage}" alt="${char.name}" style="${slotImgStyle}">`;
-    } else if (char.localImage) {
-        slotImage = `<img src="${char.localImage}" alt="${char.name}" style="${slotImgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
-    } else if (char.wikiImageUrl) {
-        slotImage = `<img src="${char.wikiImageUrl}" alt="${char.name}" style="${slotImgStyle}" onerror="this.parentElement.innerHTML='${char.emoji}'">`;
-    } else {
-        slotImage = char.emoji;
-    }
+    const slotImage = renderCharacterImage(char);
     slotElement.innerHTML = `
         <div class="character-image" style="width: 60px; height: 60px; font-size: 2rem;">${slotImage}</div>
         <div class="character-name" style="font-size: 0.7rem;">${char.name}</div>
@@ -655,48 +785,53 @@ function clearSlotDisplay(slotElement) {
  * Update mix button state
  */
 function updateMixButton() {
-    const canMix = state.mixSlots[0] && state.mixSlots[1];
-    elements.mixButton.disabled = !canMix;
+    const filledCount = state.mixSlots.filter(Boolean).length;
+    elements.mixButton.disabled = filledCount < 2;
+    if (filledCount >= 2) {
+        elements.mixButton.textContent = filledCount > 2 ? `MIX ${filledCount}!` : 'MIX!';
+    }
 }
 
 /**
  * Perform the mix!
  */
 async function performMix() {
-    if (!state.mixSlots[0] || !state.mixSlots[1]) return;
+    // Need at least 2 filled slots
+    const parents = state.mixSlots.filter(Boolean);
+    if (parents.length < 2) return;
 
-    // Animate button
+    // Animate button + vortex
     elements.mixButton.classList.add('mixing');
     elements.mixButton.disabled = true;
     elements.mixButton.textContent = 'MIXING...';
+    elements.mixingBowl.classList.add('mixing-vortex');
 
     // Play mixing sound
     playMixing();
 
     // Mix after animation
     setTimeout(async () => {
-        const char1 = state.mixSlots[0];
-        const char2 = state.mixSlots[1];
+        // Perform mix with all parents
+        let result = mixCharacters(parents, state.globalSeed);
 
-        // Perform mix
-        let result = mixCharacters(char1, char2, state.globalSeed);
-
-        // Check for special combo
-        const specialCombo = checkSpecialCombo(char1, char2);
-        if (specialCombo) {
-            result = applySpecialCombo(result, specialCombo);
+        // Check for special combo (2-parent combos only)
+        let specialCombo = null;
+        if (parents.length === 2) {
+            specialCombo = checkSpecialCombo(parents[0], parents[1]);
+            if (specialCombo) {
+                result = applySpecialCombo(result, specialCombo);
+            }
         }
 
-        // Try to generate AI fusion image
+        // Try to generate AI fusion image (first 2 parents for prompt)
         if (state.geminiConfigured) {
             elements.mixButton.textContent = 'GENERATING...';
-            // Show spinner in result area while generating
             elements.resultArea.classList.remove('hidden');
             elements.resultCharacter.innerHTML = '<div class="generating-spinner"></div><p style="color: var(--accent-gold); font-family: Bangers, cursive;">Generating fusion...</p>';
             elements.collectBtn.style.display = 'none';
             try {
                 const imageGenerator = getImageGenerator();
-                const fusionImage = await imageGenerator.getFusionImage(char1, char2);
+                const fusionImage = await imageGenerator.getFusionImage(parents[0], parents[1]);
                 if (fusionImage) {
                     result.generatedImage = fusionImage;
                 }
@@ -719,14 +854,17 @@ async function performMix() {
             playSuccess();
         }
 
-        // Reset slots
-        state.mixSlots = [null, null];
-        clearSlotDisplay(elements.slot1);
-        clearSlotDisplay(elements.slot2);
+        // Reset all slots
+        state.mixSlots = new Array(state.maxSlots).fill(null);
+        elements.mixingBowl.querySelectorAll('.mix-slot').forEach(slot => clearSlotDisplay(slot));
 
+        elements.mixingBowl.classList.remove('mixing-vortex');
         elements.mixButton.classList.remove('mixing');
         elements.mixButton.textContent = 'MIX!';
         updateMixButton();
+
+        // Check progressive unlock
+        checkProgressiveUnlock();
 
     }, 1000);
 }
@@ -737,16 +875,8 @@ async function performMix() {
 function showResult(char, isSpecial) {
     const fame = calculateDisplayFame(char);
 
-    // Image priority for result display
-    let imageContent;
     const resultImgStyle = 'width: 100px; height: 100px; border-radius: 10px; object-fit: cover;';
-    if (char.generatedImage) {
-        imageContent = `<img src="${char.generatedImage}" alt="${char.name}" style="${resultImgStyle}">`;
-    } else if (char.localImage) {
-        imageContent = `<img src="${char.localImage}" alt="${char.name}" style="${resultImgStyle}">`;
-    } else {
-        imageContent = char.emoji;
-    }
+    const imageContent = renderCharacterImage(char, resultImgStyle);
 
     elements.resultCharacter.innerHTML = `
         <div class="character-card ${char.tier.toLowerCase()}" style="width: auto; max-width: 200px; margin: 0 auto;">
@@ -755,18 +885,25 @@ function showResult(char, isSpecial) {
                 ${imageContent}
             </div>
             <div class="character-name">${char.name}</div>
-            <div class="character-fame">⭐ ${fame.toLocaleString()}</div>
-            ${isSpecial ? '<div style="color: #39ff14; margin-top: 5px;">✨ SPECIAL COMBO! ✨</div>' : ''}
-            ${char.generatedImage ? '<div style="color: #00f5ff; font-size: 0.7rem; margin-top: 3px;">🤖 AI Generated</div>' : ''}
+            <div class="character-fame">${fame.toLocaleString()}</div>
+            ${isSpecial ? '<div style="color: #39ff14; margin-top: 5px;">SPECIAL COMBO!</div>' : ''}
+            ${char.generatedImage ? '<div style="color: #00f5ff; font-size: 0.7rem; margin-top: 3px;">AI Generated</div>' : ''}
             <div style="font-size: 0.7rem; color: #888; margin-top: 5px;">
-                ${char.parentNames[0]} + ${char.parentNames[1]}
+                ${char.parentNames.join(' + ')}
             </div>
         </div>
     `;
 
     elements.resultArea.classList.remove('hidden');
 
-    // Particle burst on mix success
+    // Bug 2 fix: attach lightbox to result image
+    const resultImg = elements.resultCharacter.querySelector('.character-image img');
+    if (resultImg) {
+        resultImg.style.cursor = 'zoom-in';
+        resultImg.addEventListener('click', () => openLightbox(resultImg.src, char.name));
+    }
+
+    // Enhanced particles based on tier and parent count
     const tierColors = {
         COMMON: '#888888',
         RARE: '#3498db',
@@ -775,8 +912,21 @@ function showResult(char, isSpecial) {
         MYTHIC: '#ff6b9d'
     };
     const particleColor = isSpecial ? '#ffd700' : (tierColors[char.tier] || '#ffd700');
-    const particleCount = isSpecial ? 35 : 25;
+    const parentCount = char.parentNames?.length || 2;
+    const particleCount = (isSpecial ? 40 : 20) + (parentCount * 5);
     setTimeout(() => spawnParticles(elements.resultCharacter, particleCount, particleColor), 100);
+
+    // Screen shake for Legendary/Mythic
+    if (char.tier === 'LEGENDARY' || char.tier === 'MYTHIC') {
+        document.getElementById('game-screen').classList.add('screen-shake');
+        setTimeout(() => document.getElementById('game-screen').classList.remove('screen-shake'), 500);
+    }
+
+    // Tier flash for upgraded results
+    const resultCard = elements.resultCharacter.querySelector('.character-card');
+    if (resultCard) {
+        resultCard.classList.add('tier-flash');
+    }
 }
 
 /**
@@ -807,9 +957,10 @@ function collectResult() {
     elements.resultArea.classList.add('hidden');
     state.lastResult = null;
 
-    // Update UI
+    // Update UI + save
     renderCollection();
     updateStats();
+    saveGameState();
 }
 
 /**
@@ -822,16 +973,7 @@ function becomeFinalBoss(finalChar) {
     playFinalBoss();
 
     // Show boss screen
-    // Boss image priority
-    let bossImage;
-    const bossImgStyle = 'width: 100%; height: 100%; border-radius: 10px; object-fit: cover;';
-    if (finalChar.generatedImage) {
-        bossImage = `<img src="${finalChar.generatedImage}" alt="${finalChar.name}" style="${bossImgStyle}">`;
-    } else if (finalChar.localImage) {
-        bossImage = `<img src="${finalChar.localImage}" alt="${finalChar.name}" style="${bossImgStyle}">`;
-    } else {
-        bossImage = finalChar.emoji;
-    }
+    const bossImage = renderCharacterImage(finalChar);
 
     elements.finalBossDisplay.innerHTML = `
         <div class="character-card mythic" style="width: auto; max-width: 300px; margin: 0 auto; padding: 20px;">
@@ -855,7 +997,7 @@ function newGamePlus() {
     // Reset with bonuses
     state.selectedStarters = [];
     state.collection = [];
-    state.mixSlots = [null, null];
+    state.mixSlots = new Array(state.maxSlots).fill(null);
     state.mixCount = 0;
     state.lastResult = null;
     // Keep some fame as bonus
@@ -863,6 +1005,7 @@ function newGamePlus() {
     state.totalCoins = 0;
     state.isFinalBoss = false;
 
+    localStorage.removeItem('brainrot_save');
     switchScreen('starter');
     renderStarterScreen();
 }

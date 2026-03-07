@@ -126,6 +126,9 @@ export class GeminiAPI {
 
         for (const model of models) {
             try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 30000);
+
                 const response = await fetch(
                     `${GEMINI_API_BASE}/models/${model}:generateContent?key=${this.apiKey}`,
                     {
@@ -133,6 +136,7 @@ export class GeminiAPI {
                         headers: {
                             'Content-Type': 'application/json',
                         },
+                        signal: controller.signal,
                         body: JSON.stringify({
                             contents: [{
                                 parts: [{
@@ -145,6 +149,8 @@ export class GeminiAPI {
                         })
                     }
                 );
+
+                clearTimeout(timeout);
 
                 if (response.status === 404) {
                     console.warn(`Model ${model} not found, trying fallback...`);
