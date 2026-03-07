@@ -47,12 +47,16 @@ italian-brainrot-mixing-mod/
 │   └── styles.css          # Meme aesthetic + Parents Zone styling
 ├── js/
 │   ├── mersenne.js         # MT19937 RNG (from Qwartel)
-│   ├── game.js             # Main game logic + Parents Zone + lightbox + particles
+│   ├── game.js             # Main game logic + UI + persistence + progressive unlock
 │   ├── characters.js       # Character definitions + wiki URLs + local image paths
-│   ├── mixing.js           # Mixing algorithm
+│   ├── mixing.js           # Mixing algorithm (2-4 parents, 8 naming strategies)
+│   ├── achievements.js     # Achievement system with badges and gallery
+│   ├── combo-book.js       # Combo Discovery Book (track special combos)
 │   ├── gemini-api.js       # Google Gemini API wrapper
 │   ├── image-generator.js  # AI fusion image generation + IndexedDB cache
 │   └── audio.js            # Web Audio API + synthesized SFX
+├── tests/
+│   └── test-mixing.js      # 39 Goodhart-protected mixing algorithm tests
 ├── scripts/
 │   └── generate-portraits.mjs  # Gemini portrait generation (40 characters)
 ├── assets/
@@ -71,13 +75,24 @@ italian-brainrot-mixing-mod/
 
 ### Mixing Algorithm
 
-Uses Mersenne Twister for reproducible, seeded mixing:
+Uses Mersenne Twister for reproducible, seeded mixing. Supports 2-4 parents:
 
 ```javascript
-// Same characters + same seed = same result
-const mixSeed = hashCombine(char1.id, char2.id, globalSeed);
+// Sort parent IDs for order-independent determinism
+parents = [...parents].sort((a, b) => a.id.localeCompare(b.id));
+const mixSeed = hashCombine(...parents.map(p => p.id), globalSeed);
 const rng = new MersenneTwister(mixSeed);
 ```
+
+8 naming strategies using Italian brainrot syllable pools (prefixes, middles, suffixes, connectors, epithets).
+
+### Progressive Unlock
+
+| Unlock | Requirement | Bowl Slots |
+|--------|------------|------------|
+| Start | -- | 2 slots |
+| Triple Mix | 5 mixes | 3 slots |
+| Quad Mix | 15 mixes | 4 slots |
 
 ### Tier System
 
@@ -92,7 +107,7 @@ const rng = new MersenneTwister(mixSeed);
 ### Fame Calculation
 
 ```javascript
-fame = (parent1.fame + parent2.fame) / 2 * mixBonus * tierMultiplier
+fame = avg(parentFames) * mixBonus * tierMultiplier * parentCountBonus
 ```
 
 ### Final Boss Trigger
@@ -100,6 +115,14 @@ fame = (parent1.fame + parent2.fame) / 2 * mixBonus * tierMultiplier
 Achieved when:
 - Generation depth >= 5 (5+ mixes deep)
 - OR Collection >= 20 characters
+
+## Testing
+
+```bash
+npm test  # Run 39 Goodhart-protected mixing algorithm tests
+```
+
+Tests cover: determinism, order independence, seed sensitivity, name quality, tier validity, fame calculation, generation depth, multi-parent mixing (3 and 4), special combos, legacy API compatibility, abilities, parent count bonus.
 
 ## Characters (40 Total)
 
@@ -176,7 +199,7 @@ Predefined recipes with bonus fame:
 - [x] AI-generated fusion images
 - [x] Fallback to emojis when no API key
 
-### Phase 3: Audio (Current)
+### Phase 3: Audio
 - [x] Web Audio API sound manager (js/audio.js)
 - [x] Synthesized SFX fallback (no audio files needed)
 - [x] Audio controls UI (music/SFX toggles)
@@ -206,6 +229,20 @@ Predefined recipes with bonus fame:
 - [x] Toast notifications
 - [ ] Leaderboards
 - [ ] Persistent high scores
+
+### Phase 6: v2 Enhancements (Current)
+- [x] Multi-parent mixing (2-4 parents)
+- [x] Progressive unlock (2/3/4 slots at 0/5/15 mixes)
+- [x] 8 Italian brainrot naming strategies
+- [x] Fixed mixing bowl UI
+- [x] Animations (vortex, shake, stagger, particles)
+- [x] Long-press lightbox for mobile
+- [x] Collection persistence (localStorage + IndexedDB)
+- [x] Automated tests (39 Goodhart-protected)
+- [x] CI pipeline (GitHub Actions)
+- [ ] Achievement system with badges
+- [ ] Combo Discovery Book
+- [ ] PWA + offline support
 
 ## Social Features
 
@@ -375,11 +412,11 @@ Prioritised gaps for development sessions:
 
 | Priority | Gap | Status |
 |----------|-----|--------|
-| P0 | Automated tests for mixing algorithm | TODO |
-| P0 | CI pipeline (GitHub Actions) | TODO |
-| P1 | package.json with test scripts | TODO |
-| P1 | Extract duplicated image rendering (DRY) | TODO |
-| P1 | Collection persistence (localStorage) | TODO |
+| P0 | Automated tests for mixing algorithm | DONE (PR #3) |
+| P0 | CI pipeline (GitHub Actions) | DONE (PR #3) |
+| P1 | package.json with test scripts | DONE (PR #3) |
+| P1 | Extract duplicated image rendering (DRY) | DONE (PR #3) |
+| P1 | Collection persistence (localStorage) | DONE (PR #3) |
 | P2 | PWA + service worker | TODO |
 | P2 | Accessibility audit (ARIA, keyboard nav) | TODO |
 | P2 | ESLint config | TODO |
