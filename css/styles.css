@@ -1761,3 +1761,49 @@ body::before {
 .character-name[title="Tap to nickname"] {
     text-decoration: underline dotted rgba(255, 215, 0, 0.3);
 }
+
+/* ========================================
+   MIX PREVIEW
+   ======================================== */
+
+.mix-preview {
+    text-align: center;
+    padding: 6px 12px;
+    margin: 8px 0;
+    font-family: 'Comic Neue', cursive;
+    font-size: 0.8rem;
+    display: none;
+}
+
+.preview-tier {
+    font-family: 'Bangers', cursive;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.preview-upgrade {
+    color: #ffd700;
+    font-size: 0.75rem;
+    margin-left: 4px;
+}
+
+.preview-special {
+    display: block;
+    color: #39ff14;
+    font-family: 'Bangers', cursive;
+    font-size: 0.9rem;
+    animation: previewPulse 1s ease infinite;
+    margin-top: 2px;
+}
+
+@keyframes previewPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.preview-fame {
+    display: block;
+    color: #888;
+    font-size: 0.7rem;
+    margin-top: 2px;
+}
