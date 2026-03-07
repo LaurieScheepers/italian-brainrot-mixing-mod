@@ -26,6 +26,7 @@ import {
     toggleSFX,
     getAudioState
 } from './audio.js';
+import { checkAchievements, getEarnedAchievements, getAllAchievements } from './achievements.js';
 
 // Progressive unlock thresholds
 const UNLOCK_THRESHOLDS = { 3: 5, 4: 15 }; // slots: mixCount needed
@@ -46,7 +47,10 @@ const state = {
     isFinalBoss: false,
     geminiConfigured: false,
     isChallenge: false,
-    challengeSeed: null
+    challengeSeed: null,
+    specialCombosFound: 0,
+    highestTierCreated: null,
+    lastMixParentCount: 0
 };
 
 // Tap-to-place state (mobile support)
@@ -81,6 +85,12 @@ function init() {
     parseShareURL();
     loadSavedPreferences();
     addAudioControls();
+
+    // Achievement trophy button
+    const trophyBtn = document.getElementById('achievement-btn');
+    if (trophyBtn) {
+        trophyBtn.addEventListener('click', showAchievementGallery);
+    }
     console.log('Italian Brainrot Mixing Mod initialized!');
     console.log('Created by Luka & Pappa');
 }
@@ -111,7 +121,9 @@ function saveGameState() {
         mixCount: state.mixCount,
         maxSlots: state.maxSlots,
         globalSeed: state.globalSeed,
-        selectedStarters: state.selectedStarters
+        selectedStarters: state.selectedStarters,
+        specialCombosFound: state.specialCombosFound,
+        highestTierCreated: state.highestTierCreated
     };
     localStorage.setItem('brainrot_save', JSON.stringify(saveData));
 }
@@ -132,6 +144,8 @@ function loadGameState() {
         state.maxSlots = data.maxSlots || 2;
         state.globalSeed = data.globalSeed || Date.now();
         state.selectedStarters = data.selectedStarters || [];
+        state.specialCombosFound = data.specialCombosFound || 0;
+        state.highestTierCreated = data.highestTierCreated || null;
         return true;
     } catch (e) {
         console.warn('Failed to load save data:', e);
@@ -843,6 +857,29 @@ async function performMix() {
 
         state.lastResult = result;
         state.mixCount++;
+        state.lastMixParentCount = parents.length;
+
+        // Track special combos found
+        if (specialCombo) {
+            state.specialCombosFound++;
+        }
+
+        // Track highest tier created
+        const TIER_RANK = { COMMON: 1, RARE: 2, EPIC: 3, LEGENDARY: 4, MYTHIC: 5 };
+        const resultRank = TIER_RANK[result.tier] || 0;
+        const currentRank = TIER_RANK[state.highestTierCreated] || 0;
+        if (resultRank > currentRank) {
+            state.highestTierCreated = result.tier;
+        }
+
+        // Update collection size for achievement checks
+        state.collectionSize = state.collection.length;
+
+        // Check achievements
+        const newAchievements = checkAchievements(state);
+        newAchievements.forEach((ach, i) => {
+            setTimeout(() => showAchievementToast(ach), i * 800);
+        });
 
         // Show result
         showResult(result, specialCombo !== null);
@@ -968,6 +1005,13 @@ function collectResult() {
  */
 function becomeFinalBoss(finalChar) {
     state.isFinalBoss = true;
+
+    // Check achievements after becoming final boss
+    state.collectionSize = state.collection.length;
+    const newAchievements = checkAchievements(state);
+    newAchievements.forEach((ach, i) => {
+        setTimeout(() => showAchievementToast(ach), i * 800);
+    });
 
     // Play epic fanfare
     playFinalBoss();
@@ -1112,6 +1156,73 @@ function startDailyChallenge() {
 
     startGame();
     showToast('Daily Challenge started! Same starters for everyone today');
+}
+
+/**
+ * Show an achievement toast notification (slides in from top)
+ */
+function showAchievementToast(achievement) {
+    const toast = document.createElement('div');
+    toast.className = 'achievement-toast';
+    toast.innerHTML = `
+        <div class="achievement-icon">${achievement.icon}</div>
+        <div class="achievement-text">
+            <div class="achievement-title">Achievement Unlocked!</div>
+            <div class="achievement-name">${achievement.name}</div>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 500);
+    }, 3500);
+}
+
+/**
+ * Show the achievements gallery modal
+ */
+function showAchievementGallery() {
+    const earned = getEarnedAchievements();
+    const all = getAllAchievements();
+
+    const modal = document.createElement('div');
+    modal.className = 'achievement-modal';
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+
+    const grid = document.createElement('div');
+    grid.className = 'achievement-grid';
+
+    all.forEach(ach => {
+        const isEarned = earned.includes(ach.id);
+        const card = document.createElement('div');
+        card.className = `achievement-card ${isEarned ? 'earned' : 'locked'}`;
+        card.innerHTML = `
+            <div class="icon">${isEarned ? ach.icon : '?'}</div>
+            <div class="name">${isEarned ? ach.name : '???'}</div>
+            <div class="desc">${isEarned ? ach.description : 'Keep playing to unlock!'}</div>
+        `;
+        grid.appendChild(card);
+    });
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'achievement-close-btn';
+    closeBtn.textContent = 'CLOSE';
+    closeBtn.addEventListener('click', () => modal.remove());
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 15px;';
+
+    const title = document.createElement('h2');
+    title.className = 'achievement-gallery-title';
+    title.textContent = `ACHIEVEMENTS (${earned.length}/${all.length})`;
+
+    wrapper.appendChild(title);
+    wrapper.appendChild(grid);
+    wrapper.appendChild(closeBtn);
+    modal.appendChild(wrapper);
+    document.body.appendChild(modal);
 }
 
 /**
