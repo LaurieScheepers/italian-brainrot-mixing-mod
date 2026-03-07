@@ -8,6 +8,7 @@ import { mixCharacters, checkSpecialCombo, applySpecialCombo, hashString } from 
 import { MersenneTwister } from './mersenne.js';
 import { getGeminiAPI, saveApiKey, initGeminiFromStorage } from './gemini-api.js';
 import { getImageGenerator } from './image-generator.js';
+import { markComboDiscovered, getComboStats, renderComboBook } from './combo-book.js';
 import {
     initAudio,
     playSelect,
@@ -299,6 +300,9 @@ function setupEventListeners() {
     // Social feature buttons
     elements.dailyChallengeBtn?.addEventListener('click', startDailyChallenge);
     elements.shareFab?.addEventListener('click', shareChallenge);
+
+    // Combo book button
+    document.getElementById('combo-book-btn')?.addEventListener('click', openComboBook);
 }
 
 /**
@@ -834,6 +838,7 @@ async function performMix() {
             specialCombo = checkSpecialCombo(parents[0], parents[1]);
             if (specialCombo) {
                 result = applySpecialCombo(result, specialCombo);
+                markComboDiscovered(parents[0].id, parents[1].id);
             }
         }
 
@@ -1223,6 +1228,16 @@ function showAchievementGallery() {
     wrapper.appendChild(closeBtn);
     modal.appendChild(wrapper);
     document.body.appendChild(modal);
+}
+
+/**
+ * Open the Combo Discovery Book modal
+ */
+function openComboBook() {
+    // Remove existing if open
+    document.getElementById('combo-book-modal')?.remove();
+    const html = renderComboBook();
+    document.body.insertAdjacentHTML('beforeend', html);
 }
 
 /**
