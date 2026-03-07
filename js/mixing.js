@@ -209,8 +209,9 @@ export function mixCharacters(parents, arg2, globalSeed) {
         globalSeed = arg2 || Date.now();
     }
 
-    // Sort IDs for order-independent determinism
-    const sortedIds = parents.map(p => p.id).sort();
+    // Sort parents by ID for order-independent determinism
+    parents = [...parents].sort((a, b) => a.id.localeCompare(b.id));
+    const sortedIds = parents.map(p => p.id);
     const mixSeed = hashCombine(...sortedIds, globalSeed);
 
     const rng = new MersenneTwister(mixSeed);

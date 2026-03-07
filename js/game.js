@@ -94,6 +94,52 @@ function addAudioControls() {
 }
 
 /**
+ * Save game state to localStorage (metadata only, images stay in IndexedDB)
+ */
+function saveGameState() {
+    const saveData = {
+        collection: state.collection.map(c => ({
+            id: c.id, name: c.name, tier: c.tier, fameBase: c.fameBase,
+            emoji: c.emoji, species: c.species, origin: c.origin,
+            abilities: c.abilities, parents: c.parents, parentNames: c.parentNames,
+            generationDepth: c.generationDepth, isCombo: c.isCombo, seed: c.seed,
+            localImage: c.localImage, wikiImageUrl: c.wikiImageUrl,
+            audio: c.audio, description: c.description
+        })),
+        totalFame: state.totalFame,
+        totalCoins: state.totalCoins,
+        mixCount: state.mixCount,
+        maxSlots: state.maxSlots,
+        globalSeed: state.globalSeed,
+        selectedStarters: state.selectedStarters
+    };
+    localStorage.setItem('brainrot_save', JSON.stringify(saveData));
+}
+
+/**
+ * Load saved game state from localStorage
+ */
+function loadGameState() {
+    const saved = localStorage.getItem('brainrot_save');
+    if (!saved) return false;
+
+    try {
+        const data = JSON.parse(saved);
+        state.collection = data.collection || [];
+        state.totalFame = data.totalFame || 0;
+        state.totalCoins = data.totalCoins || 0;
+        state.mixCount = data.mixCount || 0;
+        state.maxSlots = data.maxSlots || 2;
+        state.globalSeed = data.globalSeed || Date.now();
+        state.selectedStarters = data.selectedStarters || [];
+        return true;
+    } catch (e) {
+        console.warn('Failed to load save data:', e);
+        return false;
+    }
+}
+
+/**
  * Load saved preferences from localStorage
  */
 function loadSavedPreferences() {
@@ -109,6 +155,25 @@ function loadSavedPreferences() {
     if (savedApiKey) {
         initGeminiFromStorage();
         state.geminiConfigured = true;
+    }
+
+    // Check for challenge URL first (overrides save)
+    if (state.isChallenge) return;
+
+    // Try to resume saved game
+    if (savedRating && loadGameState() && state.collection.length > 0) {
+        if (confirm('Continue where you left off?')) {
+            switchScreen('game');
+            renderMixSlots();
+            renderCollection();
+            updateStats();
+            if (state.isChallenge && elements.challengeBanner) {
+                elements.challengeBanner.classList.remove('hidden');
+            }
+            return;
+        }
+        // User chose not to continue - clear save
+        localStorage.removeItem('brainrot_save');
     }
 
     // If returning user, skip Parents Zone
@@ -892,9 +957,10 @@ function collectResult() {
     elements.resultArea.classList.add('hidden');
     state.lastResult = null;
 
-    // Update UI
+    // Update UI + save
     renderCollection();
     updateStats();
+    saveGameState();
 }
 
 /**
@@ -939,6 +1005,7 @@ function newGamePlus() {
     state.totalCoins = 0;
     state.isFinalBoss = false;
 
+    localStorage.removeItem('brainrot_save');
     switchScreen('starter');
     renderStarterScreen();
 }
