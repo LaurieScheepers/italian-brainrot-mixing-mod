@@ -242,7 +242,7 @@ Predefined recipes with bonus fame:
 - [ ] Leaderboards
 - [ ] Persistent high scores
 
-### Phase 6: v2 Enhancements (Current)
+### Phase 6: v2 Enhancements
 - [x] Multi-parent mixing (2-4 parents)
 - [x] Progressive unlock (2/3/4 slots at 0/5/15 mixes)
 - [x] 8 Italian brainrot naming strategies
@@ -256,7 +256,17 @@ Predefined recipes with bonus fame:
 - [x] Combo Discovery Book
 - [x] Fix: result area z-index overlay (always visible above mixing bowl)
 - [x] Collect button shortcut on lightbox view
-- [ ] PWA + offline support
+- [x] Post-boss endless mixing loop (PR #8)
+
+### Phase 7: Next (Planned)
+- [ ] PWA + offline support (manifest.json + service worker)
+- [ ] Real audio: character name SFX (40 characters)
+- [ ] Real audio: background music (menu/game/boss themes)
+- [ ] Daily challenge rotation (5 challenge types)
+- [ ] Battle mode (character vs character combat)
+- [ ] Leaderboard + persistent high scores
+- [ ] Accessibility audit (ARIA, keyboard nav, focus management)
+- [ ] ESLint + Prettier config
 
 ## Social Features
 
@@ -453,9 +463,14 @@ Prioritised gaps for development sessions:
 | P1 | package.json with test scripts | DONE (PR #3) |
 | P1 | Extract duplicated image rendering (DRY) | DONE (PR #3) |
 | P1 | Collection persistence (localStorage) | DONE (PR #3) |
+| P1 | Post-boss endless mixing loop | DONE (PR #8) |
 | P2 | PWA + service worker | TODO |
+| P2 | Real audio files (names, SFX, music) | TODO |
+| P2 | Daily challenge rotation | TODO |
 | P2 | Accessibility audit (ARIA, keyboard nav) | TODO |
-| P2 | ESLint config | TODO |
+| P3 | ESLint + Prettier config | TODO |
+| P3 | Leaderboard + persistent high scores | TODO |
+| P3 | Battle mode | TODO |
 
 See `docs/ARCHITECTURE-ANALYSIS.md` for full gap analysis.
 See `docs/GRIP-PROMPTS.md` for copy-paste execution prompts.
