@@ -4,6 +4,7 @@
  */
 
 import { getAllBaseCharacters, getTierInfo, calculateDisplayFame, loadWikiCharacters } from './characters.js';
+import { getDailyChallengeType, calculateChallengeScore, getStarRating, saveChallengeScore, getBestScore } from './challenges.js';
 import { mixCharacters, checkSpecialCombo, applySpecialCombo, hashString } from './mixing.js';
 import { MersenneTwister } from './mersenne.js';
 import { getGeminiAPI, saveApiKey, initGeminiFromStorage } from './gemini-api.js';
@@ -50,6 +51,8 @@ const state = {
     geminiConfigured: false,
     isChallenge: false,
     challengeSeed: null,
+    challengeType: null,
+    challengeMixLimit: null,
     specialCombosFound: 0,
     highestTierCreated: null,
     lastMixParentCount: 0,
@@ -1117,6 +1120,16 @@ async function performMix() {
         // Check progressive unlock
         checkProgressiveUnlock();
 
+        // Update challenge banner progress
+        if (state.isChallenge) {
+            updateChallengeBanner();
+        }
+
+        // Check if challenge mix limit reached
+        if (state.isChallenge && state.challengeMixLimit && state.mixCount >= state.challengeMixLimit) {
+            setTimeout(() => showChallengeComplete(), 600);
+        }
+
     }, 1000);
 }
 
@@ -1389,6 +1402,10 @@ function startDailyChallenge() {
     state.isChallenge = true;
     state.selectedStarters = [...starterIndices].map(i => allChars[i].id);
 
+    const challengeType = getDailyChallengeType(seed);
+    state.challengeType = challengeType;
+    state.challengeMixLimit = challengeType.limit;
+
     // Load saved content rating
     const savedRating = localStorage.getItem('contentRating');
     if (savedRating) {
@@ -1396,6 +1413,7 @@ function startDailyChallenge() {
     }
 
     startGame();
+    updateChallengeBanner();
     showToast('Daily Challenge started! Same starters for everyone today');
 }
 
@@ -1483,6 +1501,85 @@ function openFamilyTree() {
     document.getElementById('family-tree-modal')?.remove();
     const html = renderFamilyTree(state.collection);
     document.body.insertAdjacentHTML('beforeend', html);
+}
+
+/**
+ * Update the challenge banner with type info and progress
+ */
+function updateChallengeBanner() {
+    if (!state.isChallenge || !state.challengeType) return;
+    const banner = elements.challengeBanner;
+    if (!banner) return;
+
+    const type = state.challengeType;
+    banner.classList.remove('hidden');
+
+    const iconEl = document.getElementById('challenge-type-icon');
+    const nameEl = document.getElementById('challenge-type-name');
+    const objEl = document.getElementById('challenge-objective');
+    const progEl = document.getElementById('challenge-progress');
+
+    if (iconEl) iconEl.textContent = type.icon;
+    if (nameEl) nameEl.textContent = type.name.toUpperCase();
+    if (objEl) objEl.textContent = type.objective;
+    if (progEl && type.limit) {
+        progEl.textContent = `Mixes: ${state.mixCount}/${type.limit}`;
+    } else if (progEl) {
+        progEl.textContent = `Mixes: ${state.mixCount}`;
+    }
+}
+
+/**
+ * Show the challenge complete overlay with score + stars
+ */
+function showChallengeComplete() {
+    const type = state.challengeType;
+    const gameStateSnapshot = {
+        mixCount: state.mixCount,
+        collectionSize: state.collection.length,
+        highestTier: state.highestTierCreated,
+        specialCombosFound: state.specialCombosFound,
+        maxDepth: Math.max(...state.collection.map(c => c.generationDepth || 0), 0),
+        totalFame: state.totalFame
+    };
+    const score = calculateChallengeScore(type, gameStateSnapshot);
+    const stars = getStarRating(score);
+    const today = new Date().toISOString().slice(0, 10);
+    const prevBest = getBestScore(type.id);
+    const isNewRecord = score > prevBest;
+
+    saveChallengeScore(today, { typeId: type.id, score, stars, date: today });
+
+    const starsHtml = [1, 2, 3]
+        .map(n => `<span class="challenge-star ${n <= stars ? 'earned' : 'empty'}">&#11088;</span>`)
+        .join('');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'challenge-complete-overlay';
+    overlay.innerHTML = `
+        <div class="challenge-complete-modal">
+            <div class="challenge-complete-icon">${type.icon}</div>
+            <h2 class="challenge-complete-title">${type.name} Complete!</h2>
+            <div class="challenge-stars">${starsHtml}</div>
+            <div class="challenge-score">Score: <strong>${score}</strong></div>
+            ${isNewRecord ? '<div class="challenge-new-record">NEW RECORD!</div>' : `<div class="challenge-best">Best: ${prevBest}</div>`}
+            <div class="challenge-complete-buttons">
+                <button class="challenge-share-btn">Share</button>
+                <button class="challenge-again-btn">Play Again</button>
+            </div>
+        </div>
+    `;
+
+    overlay.querySelector('.challenge-share-btn').addEventListener('click', () => {
+        shareChallenge();
+        overlay.remove();
+    });
+    overlay.querySelector('.challenge-again-btn').addEventListener('click', () => {
+        overlay.remove();
+        startMixingAgain();
+    });
+
+    document.body.appendChild(overlay);
 }
 
 /**

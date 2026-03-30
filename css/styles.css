@@ -1248,6 +1248,160 @@ body::before {
     font-family: monospace;
 }
 
+/* Challenge Banner — type icon, objective, progress */
+.challenge-type-icon {
+    font-size: 1.4rem;
+}
+
+.challenge-objective {
+    font-size: 0.8rem;
+    color: var(--accent-cyan);
+    font-style: italic;
+}
+
+.challenge-progress {
+    font-family: 'Bangers', cursive;
+    font-size: 1rem;
+    color: var(--accent-pink);
+    letter-spacing: 1px;
+}
+
+/* Challenge complete overlay */
+.challenge-complete-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
+}
+
+.challenge-complete-modal {
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-gold);
+    border-radius: 20px;
+    padding: 36px 32px;
+    text-align: center;
+    max-width: 340px;
+    width: 90%;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+}
+
+.challenge-complete-icon {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.challenge-complete-title {
+    font-family: 'Bangers', cursive;
+    font-size: 1.8rem;
+    color: var(--accent-gold);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+}
+
+/* Star rating */
+.challenge-stars {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.challenge-star {
+    font-size: 2rem;
+    transition: transform 0.3s ease;
+}
+
+.challenge-star.earned {
+    color: var(--accent-gold);
+    text-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+    animation: starPop 0.4s ease backwards;
+}
+
+.challenge-star.empty {
+    color: #444;
+}
+
+.challenge-star.earned:nth-child(1) { animation-delay: 0.1s; }
+.challenge-star.earned:nth-child(2) { animation-delay: 0.25s; }
+.challenge-star.earned:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes starPop {
+    0% { transform: scale(0.4); opacity: 0; }
+    70% { transform: scale(1.3); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.challenge-score {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.challenge-score strong {
+    color: var(--accent-cyan);
+    font-size: 1.4rem;
+}
+
+.challenge-new-record {
+    font-family: 'Bangers', cursive;
+    font-size: 1.3rem;
+    color: var(--accent-green);
+    letter-spacing: 2px;
+    animation: newRecordGlow 1s ease-in-out infinite alternate;
+    margin-bottom: 16px;
+}
+
+@keyframes newRecordGlow {
+    from { text-shadow: 0 0 8px rgba(57, 255, 20, 0.4); }
+    to { text-shadow: 0 0 20px rgba(57, 255, 20, 0.9); }
+}
+
+.challenge-best {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.challenge-complete-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.challenge-share-btn,
+.challenge-again-btn {
+    font-family: 'Bangers', cursive;
+    font-size: 1.1rem;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.challenge-share-btn {
+    background: linear-gradient(45deg, var(--accent-cyan), var(--accent-pink));
+    color: var(--bg-primary);
+}
+
+.challenge-again-btn {
+    background: linear-gradient(45deg, var(--accent-gold), var(--accent-pink));
+    color: var(--bg-primary);
+}
+
+.challenge-share-btn:hover,
+.challenge-again-btn:hover {
+    transform: scale(1.08);
+    box-shadow: var(--shadow-glow);
+}
+
 /* Daily Challenge Button */
 .daily-challenge-button {
     font-family: 'Bangers', cursive;
