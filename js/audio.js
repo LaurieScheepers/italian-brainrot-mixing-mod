@@ -3,6 +3,8 @@
  * Web Audio API for SFX + HTML5 Audio for music
  */
 
+import { getCharacterById } from './characters.js';
+
 // Audio Context (created on first user interaction)
 let audioCtx = null;
 
@@ -46,7 +48,7 @@ export function initAudio() {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         audioState.isInitialized = true;
         loadPreferences();
-        console.log('🔊 Audio system initialized');
+        console.log('Audio system initialized');
     } catch (error) {
         console.warn('Audio not supported:', error);
     }
@@ -123,143 +125,327 @@ export function getAudioState() {
 }
 
 // ============================================
-// SYNTHESIZED SOUNDS (Fallback when no files)
+// SHARED AUDIO HELPERS
 // ============================================
 
 /**
- * Play a synthesized beep/tone
+ * Create and connect a gain node to destination
  */
+function makeGain(value = 1) {
+    const gain = audioCtx.createGain();
+    gain.gain.value = value * audioState.sfxVolume;
+    gain.connect(audioCtx.destination);
+    return gain;
+}
+
+/**
+ * Create an oscillator connected to a gain node
+ */
+function makeOsc(type, frequency, gain) {
+    const osc = audioCtx.createOscillator();
+    osc.type = type;
+    osc.frequency.value = frequency;
+    osc.connect(gain);
+    return osc;
+}
+
+/**
+ * Schedule attack-decay envelope on a gain node
+ */
+function scheduleAD(gain, volume, attack, decay) {
+    const now = audioCtx.currentTime;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(volume * audioState.sfxVolume, now + attack);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + attack + decay);
+    return now + attack + decay;
+}
+
+/**
+ * Create a noise buffer (white noise)
+ */
+function makeNoiseBuffer(duration) {
+    const frames = Math.ceil(audioCtx.sampleRate * duration);
+    const buffer = audioCtx.createBuffer(1, frames, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1;
+    return buffer;
+}
+
+/**
+ * Play a noise burst through a filter
+ */
+function playNoiseBurst(filterType, filterFreq, duration, volumeMod = 1) {
+    const source = audioCtx.createBufferSource();
+    source.buffer = makeNoiseBuffer(duration);
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = filterType;
+    filter.frequency.value = filterFreq;
+    const gain = makeGain(0);
+    const end = scheduleAD(gain, volumeMod * 0.4, 0.005, duration);
+    source.connect(filter);
+    filter.connect(gain);
+    source.start();
+    source.stop(end);
+}
+
+/**
+ * Play a single tone with attack-decay envelope
+ */
+function playToneAD(frequency, type, attack, decay, volumeMod = 1) {
+    const gain = makeGain(0);
+    const end = scheduleAD(gain, volumeMod, attack, decay);
+    const osc = makeOsc(type, frequency, gain);
+    osc.start();
+    osc.stop(end);
+}
+
+// Legacy playTone kept for synthError (unchanged)
 function playTone(frequency, duration, type = 'sine', volumeMod = 1) {
     if (!audioCtx || !audioState.sfxEnabled) return;
-
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    oscillator.type = type;
-    oscillator.frequency.value = frequency;
-
+    const gain = makeGain(0);
     const volume = audioState.sfxVolume * volumeMod;
-    gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + duration);
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    const osc = makeOsc(type, frequency, gain);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
 }
 
-/**
- * Play a chord (multiple frequencies)
- */
-function playChord(frequencies, duration, type = 'sine') {
-    frequencies.forEach((freq, i) => {
-        setTimeout(() => playTone(freq, duration, type, 0.5), i * 50);
-    });
-}
+// ============================================
+// SYNTHESIZED SOUNDS
+// ============================================
 
 /**
- * Play synthesized select sound
+ * Select: two rising tones + harmonic overtone on each
  */
 function synthSelect() {
-    playTone(440, 0.1, 'sine');
-    setTimeout(() => playTone(550, 0.1, 'sine'), 50);
+    playToneAD(440, 'sine', 0.01, 0.12);
+    playToneAD(880, 'sine', 0.01, 0.10, 0.25); // overtone at 2x
+    setTimeout(() => {
+        playToneAD(550, 'sine', 0.01, 0.12);
+        playToneAD(1100, 'sine', 0.01, 0.10, 0.25); // overtone at 2x
+    }, 55);
 }
 
 /**
- * Play synthesized drop sound
+ * Drop: low triangle + noise burst through low-pass for "plop" texture
  */
 function synthDrop() {
-    playTone(200, 0.15, 'triangle');
-    setTimeout(() => playTone(150, 0.1, 'triangle'), 100);
+    playToneAD(200, 'triangle', 0.005, 0.15);
+    playNoiseBurst('lowpass', 300, 0.08, 0.6);
+    setTimeout(() => playToneAD(150, 'triangle', 0.005, 0.10), 100);
 }
 
 /**
- * Play synthesized mixing sound
+ * Mixing: sawtooth sweep with LFO modulation + stereo panning
  */
 function synthMixing() {
     if (!audioCtx || !audioState.sfxEnabled) return;
 
-    // Swirling sound effect
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const panner = audioCtx.createStereoPanner();
+    const lfo = audioCtx.createOscillator();
+    const lfoGain = audioCtx.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    // LFO modulates frequency depth
+    lfo.frequency.value = 6;
+    lfoGain.gain.value = 40;
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
 
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
-    oscillator.frequency.linearRampToValueAtTime(400, audioCtx.currentTime + 0.5);
-    oscillator.frequency.linearRampToValueAtTime(200, audioCtx.currentTime + 1);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+    osc.frequency.linearRampToValueAtTime(400, audioCtx.currentTime + 0.5);
+    osc.frequency.linearRampToValueAtTime(200, audioCtx.currentTime + 1);
 
-    gainNode.gain.setValueAtTime(audioState.sfxVolume * 0.3, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+    // Panning sweep L -> R
+    panner.pan.setValueAtTime(-0.6, audioCtx.currentTime);
+    panner.pan.linearRampToValueAtTime(0.6, audioCtx.currentTime + 1);
 
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 1);
+    gain.gain.setValueAtTime(audioState.sfxVolume * 0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+
+    osc.connect(gain);
+    gain.connect(panner);
+    panner.connect(audioCtx.destination);
+
+    lfo.start();
+    osc.start();
+    lfo.stop(audioCtx.currentTime + 1);
+    osc.stop(audioCtx.currentTime + 1);
 }
 
 /**
- * Play synthesized success sound
+ * Success: vibrato C→D chord with staggered attacks and sustain tail
  */
 function synthSuccess() {
-    playChord([523.25, 659.25, 783.99], 0.3, 'sine'); // C major chord
-    setTimeout(() => playChord([587.33, 739.99, 880], 0.4, 'sine'), 200); // D major
+    const cMajor = [523.25, 659.25, 783.99];
+    const dMajor = [587.33, 739.99, 880];
+
+    cMajor.forEach((freq, i) => {
+        setTimeout(() => {
+            playToneAD(freq, 'sine', 0.02, 0.35);
+            _playWithVibrato(freq, 0.35); // vibrato shimmer
+        }, i * 30);
+    });
+    setTimeout(() => {
+        dMajor.forEach((freq, i) => {
+            setTimeout(() => playToneAD(freq, 'sine', 0.02, 0.5), i * 30);
+        });
+    }, 220);
 }
 
 /**
- * Play synthesized special combo sound
+ * Add vibrato layer on top of a note (thin, decorative)
+ */
+function _playWithVibrato(baseFreq, duration) {
+    if (!audioCtx || !audioState.sfxEnabled) return;
+
+    const osc = audioCtx.createOscillator();
+    const lfo = audioCtx.createOscillator();
+    const lfoGain = audioCtx.createGain();
+    const gain = makeGain(0);
+
+    lfo.frequency.value = 5;
+    lfoGain.gain.value = 6;
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+
+    osc.type = 'sine';
+    osc.frequency.value = baseFreq;
+    osc.connect(gain);
+
+    scheduleAD(gain, 0.15, 0.03, duration);
+
+    lfo.start();
+    osc.start();
+    lfo.stop(audioCtx.currentTime + duration);
+    osc.stop(audioCtx.currentTime + duration);
+}
+
+/**
+ * Special combo: arpeggio with echo delay, richer triangle waveform
  */
 function synthSpecialCombo() {
-    // Arpeggio
+    if (!audioCtx || !audioState.sfxEnabled) return;
+
     const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 659.25, 523.25];
+    const delay = audioCtx.createDelay(1.0);
+    const delayFeedback = audioCtx.createGain();
+    delay.delayTime.value = 0.18;
+    delayFeedback.gain.value = 0.35;
+    delay.connect(delayFeedback);
+    delayFeedback.connect(delay);
+    delay.connect(audioCtx.destination);
+
     notes.forEach((freq, i) => {
-        setTimeout(() => playTone(freq, 0.15, 'sine'), i * 80);
+        setTimeout(() => {
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(audioState.sfxVolume * 0.45, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+            const osc = makeOsc('triangle', freq, gain);
+            gain.connect(delay);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.18);
+        }, i * 80);
     });
 }
 
 /**
- * Play synthesized Final Boss fanfare
+ * Final Boss: sub-bass rumble + cymbal crash + wider chord voicing
  */
 function synthFinalBoss() {
     if (!audioCtx || !audioState.sfxEnabled) return;
 
-    // Epic fanfare
+    // Sub-bass rumble at 40 Hz
+    playToneAD(40, 'sine', 0.05, 1.2, 0.7);
+
+    // Cymbal crash: high-pass filtered noise
+    playNoiseBurst('highpass', 6000, 1.0, 0.5);
+
+    // Wider chord voicing (add 5th and octave layers)
     const fanfare = [
+        { freq: 130.81, time: 0 },    // bass C
         { freq: 261.63, time: 0 },
         { freq: 329.63, time: 150 },
         { freq: 392, time: 300 },
         { freq: 523.25, time: 450 },
         { freq: 659.25, time: 600 },
         { freq: 783.99, time: 750 },
-        { freq: 1046.5, time: 900 }
+        { freq: 1046.5, time: 900 },
+        { freq: 1318.5, time: 900 }   // high E added
     ];
 
     fanfare.forEach(({ freq, time }) => {
-        setTimeout(() => playTone(freq, 0.4, 'sine'), time);
+        setTimeout(() => playToneAD(freq, 'sine', 0.01, 0.45), time);
     });
 
-    // Add bass
+    // Bass foundation
     setTimeout(() => {
-        playTone(130.81, 0.8, 'triangle', 0.7);
-        playTone(196, 0.8, 'triangle', 0.5);
+        playToneAD(130.81, 'triangle', 0.02, 0.8, 0.7);
+        playToneAD(196, 'triangle', 0.02, 0.8, 0.5);
     }, 900);
 }
 
 /**
- * Play synthesized collect sound
+ * Collect: shimmer — two detuned high sines
  */
 function synthCollect() {
-    playTone(880, 0.1, 'sine');
-    setTimeout(() => playTone(1108.73, 0.15, 'sine'), 80);
+    playToneAD(880, 'sine', 0.01, 0.12);
+    playToneAD(892, 'sine', 0.01, 0.14, 0.5);   // slightly detuned
+    setTimeout(() => {
+        playToneAD(1108.73, 'sine', 0.01, 0.18);
+        playToneAD(1122, 'sine', 0.01, 0.18, 0.5); // slightly detuned pair
+    }, 85);
 }
 
 /**
- * Play synthesized error sound
+ * Error: unchanged
  */
 function synthError() {
     playTone(200, 0.2, 'square', 0.3);
     setTimeout(() => playTone(150, 0.2, 'square', 0.3), 100);
+}
+
+// ============================================
+// TTS — CHARACTER VOICE
+// ============================================
+
+// Voice cache: resolved after voiceschanged fires
+let _ttsVoices = null;
+
+/**
+ * Get available voices, resolving the Chrome empty-on-first-call bug
+ */
+function getVoicesAsync() {
+    return new Promise((resolve) => {
+        if (_ttsVoices) { resolve(_ttsVoices); return; }
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) { _ttsVoices = voices; resolve(voices); return; }
+        window.speechSynthesis.addEventListener('voiceschanged', () => {
+            _ttsVoices = window.speechSynthesis.getVoices();
+            resolve(_ttsVoices);
+        }, { once: true });
+    });
+}
+
+/**
+ * Speak text using Italian voice if available, with comedic kid-friendly parameters
+ */
+export async function speakCatchphrase(text) {
+    if (!audioState.sfxEnabled) return;
+    if (!window.speechSynthesis) return;
+
+    const voices = await getVoicesAsync();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.3;
+    utterance.pitch = 1.4;
+
+    const italianVoice = voices.find(v => v.lang.startsWith('it'));
+    if (italianVoice) utterance.voice = italianVoice;
+
+    window.speechSynthesis.speak(utterance);
 }
 
 // ============================================
@@ -272,9 +458,7 @@ const audioCache = new Map();
  * Load an audio file
  */
 async function loadAudio(path) {
-    if (audioCache.has(path)) {
-        return audioCache.get(path);
-    }
+    if (audioCache.has(path)) return audioCache.get(path);
 
     try {
         const audio = new Audio(path);
@@ -315,72 +499,49 @@ async function playAudioOrSynth(path, synthFallback) {
 // PUBLIC SFX API
 // ============================================
 
-/**
- * Play select sound (character selected on starter screen)
- */
 export function playSelect() {
     initAudio();
     playAudioOrSynth(AUDIO_PATHS.sfx.select, synthSelect);
 }
 
-/**
- * Play drop sound (character dropped in mixing bowl)
- */
 export function playDrop() {
     initAudio();
     playAudioOrSynth(AUDIO_PATHS.sfx.drop, synthDrop);
 }
 
-/**
- * Play mixing sound (mixing in progress)
- */
 export function playMixing() {
     initAudio();
     playAudioOrSynth(AUDIO_PATHS.sfx.mixing, synthMixing);
 }
 
-/**
- * Play success sound (mix complete)
- */
 export function playSuccess() {
     initAudio();
     playAudioOrSynth(AUDIO_PATHS.sfx.success, synthSuccess);
 }
 
-/**
- * Play special combo sound
- */
 export function playSpecialCombo() {
     initAudio();
     playAudioOrSynth(AUDIO_PATHS.sfx.specialCombo, synthSpecialCombo);
 }
 
-/**
- * Play Final Boss fanfare
- */
 export function playFinalBoss() {
     initAudio();
     playAudioOrSynth(AUDIO_PATHS.sfx.finalBoss, synthFinalBoss);
 }
 
-/**
- * Play collect sound (character added to collection)
- */
 export function playCollect() {
     initAudio();
     playAudioOrSynth(AUDIO_PATHS.sfx.collect, synthCollect);
 }
 
-/**
- * Play error sound (invalid action)
- */
 export function playError() {
     initAudio();
     playAudioOrSynth(AUDIO_PATHS.sfx.error, synthError);
 }
 
 /**
- * Play character name audio
+ * Play character name audio.
+ * Tries audio file first; falls back to SpeechSynthesis catchphrase.
  */
 export async function playCharacterName(characterId) {
     initAudio();
@@ -393,9 +554,15 @@ export async function playCharacterName(characterId) {
             const clone = audio.cloneNode();
             clone.volume = audioState.sfxVolume;
             clone.play();
+            return;
         }
     } catch (error) {
-        // No audio file for this character - silent fallback
+        // fall through to TTS
+    }
+
+    const character = getCharacterById(characterId);
+    if (character && character.audio && character.audio.catchphrase) {
+        speakCatchphrase(character.audio.catchphrase);
     }
 }
 
@@ -403,14 +570,9 @@ export async function playCharacterName(characterId) {
 // MUSIC API
 // ============================================
 
-/**
- * Play background music for a screen
- */
 export async function playMusic(track) {
     initAudio();
     if (!audioState.musicEnabled) return;
-
-    // Stop current music
     stopMusic();
 
     const path = AUDIO_PATHS.music[track];
@@ -429,9 +591,6 @@ export async function playMusic(track) {
     }
 }
 
-/**
- * Stop current background music
- */
 export function stopMusic() {
     if (audioState.currentMusic) {
         audioState.currentMusic.pause();
@@ -440,18 +599,10 @@ export function stopMusic() {
     }
 }
 
-/**
- * Pause current background music
- */
 export function pauseMusic() {
-    if (audioState.currentMusic) {
-        audioState.currentMusic.pause();
-    }
+    if (audioState.currentMusic) audioState.currentMusic.pause();
 }
 
-/**
- * Resume current background music
- */
 export function resumeMusic() {
     if (audioState.currentMusic && audioState.musicEnabled) {
         audioState.currentMusic.play();
@@ -462,21 +613,13 @@ export function resumeMusic() {
 // UTILITIES
 // ============================================
 
-/**
- * Play a random brainrot sound (for fun)
- */
 export function playRandomBrainrot() {
     initAudio();
     if (!audioState.sfxEnabled) return;
-
     const sounds = [synthSelect, synthDrop, synthSuccess, synthCollect];
-    const random = sounds[Math.floor(Math.random() * sounds.length)];
-    random();
+    sounds[Math.floor(Math.random() * sounds.length)]();
 }
 
-/**
- * Create audio controls UI element
- */
 export function createAudioControls() {
     const container = document.createElement('div');
     container.className = 'audio-controls';
